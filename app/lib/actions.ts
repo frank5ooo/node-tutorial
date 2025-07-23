@@ -6,6 +6,7 @@ import postgres from 'postgres';
 import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
+import { prisma } from './prisma';
  
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
@@ -46,12 +47,10 @@ export async function createInvoice(prevState: State, formData: FormData)
 
     if (!validatedFields.success) 
     {
-    
         return {
         errors: validatedFields.error.flatten().fieldErrors,
         message: 'Missing Fields. Failed to Create Invoice.',
-        };
-        
+        };   
     }
 
     const { customerId, amount, status } = validatedFields.data;
@@ -60,10 +59,18 @@ export async function createInvoice(prevState: State, formData: FormData)
 
     try
     {
-        await sql`
-            INSERT INTO invoices (customer_id, amount, status, date)
-            VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
-        `;
+        // await sql`
+        //     INSERT INTO invoices (customer_id, amount, status, date)
+        //     VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
+        // `;
+        prisma.invoice.create({
+          data: {
+            amount: amountInCents,
+            customer_id: customerId,
+            status,
+            date
+          }
+        })
     }
     catch(error)
     {

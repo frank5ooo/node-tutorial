@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Customer {
+  id        String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name      String @db.VarChar(255)
+  email     String @db.VarChar(255)
+  image_url String @db.VarChar(255)
+
+  @@map("customers")
+}
+
+model Invoice {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  customer_id String   @db.Uuid
+  amount      Int
+  status      String   @db.VarChar(255)
+  date        DateTime @db.Date
+
+  @@map("invoices")
+}
+
+model Revenue {
+  month   String @unique @db.VarChar(4)
+  revenue Int
+
+  @@map("revenue")
+}
+
+model User {
+  id       String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name     String @db.VarChar(255)
+  email    String @unique
+  password String
+
+  @@map("users")
+}
