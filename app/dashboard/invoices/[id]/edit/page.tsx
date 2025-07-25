@@ -9,11 +9,12 @@ export default async function Page(props: { params: Promise<{ id: string }> })
     const id = params.id;
     const [invoice, customers] = await Promise.all([
         fetchInvoiceById(id),
-        fetchCustomers(),
-    ]);   
+        fetchCustomers()
+    ]);
     if (!invoice) {
         notFound();
     }
+
     return (
         <main>
         <Breadcrumbs
