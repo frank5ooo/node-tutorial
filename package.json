@@ -3,6 +3,7 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev --turbopack",
+    "inv": "node ./inv.ts",
     "start": "next start",
     "lint": "next lint"
   },

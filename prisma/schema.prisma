@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -9,28 +8,31 @@ datasource db {
 }
 
 model Customer {
-  id        String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id        String    @id @default(uuid())
   name      String    @db.VarChar(255)
   email     String    @db.VarChar(255)
   image_url String    @db.VarChar(255)
 
-  invoices  Invoice[] // Relación 1:N
+  invoices  Invoice[] 
 
   @@map("customers")
 }
 
 model Invoice {
-  id          String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  customer_id String    @db.Uuid
-  amount      Int
+  id          String    @id @default(uuid())
+  customer_id String    
+  // amount      Int
   status      String    @db.VarChar(255)
   date        DateTime  @db.Date
+  products    Product[] 
 
-  customer    Customer  @relation(fields: [customer_id], references: [id]) // Relación N:1
+  customer    Customer  @relation(fields: [customer_id], references: [id])
 
   @@map("invoices")
 }
+
 model Revenue {
+  id      String @id @default(uuid())
   month   String @unique @db.VarChar(4)
   revenue Int
 
@@ -38,10 +40,21 @@ model Revenue {
 }
 
 model User {
-  id       String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id       String @id @default(uuid())
   name     String @db.VarChar(255)
   email    String @unique
   password String
 
   @@map("users")
+}
+
+model Product {
+  id          String @id @default(uuid())
+  /// Datos del producto
+  price       Int
+  invoice_id  String?
+  // relación a Invoice
+  invoice     Invoice?  @relation(fields: [invoice_id], references: [id])
+
+  @@map("products")
 }

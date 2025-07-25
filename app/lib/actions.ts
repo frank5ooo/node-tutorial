@@ -42,8 +42,8 @@ export async function createInvoice(prevState: State, formData: FormData)
     amount: formData.get('amount'),
     status: formData.get('status'),
   });
-  
-  console.log(validatedFields);
+
+  console.log(CreateInvoice);
 
   if (!validatedFields.success) 
   {
@@ -67,7 +67,7 @@ export async function createInvoice(prevState: State, formData: FormData)
 
     await prisma.invoice.create({ 
       data: {
-        amount: amountInCents,
+        // amount: amountInCents,
         customer_id: customerId,
         status,
         date,
@@ -120,7 +120,7 @@ export async function updateInvoice(
         id,
       },
       data: {
-        amount: amountInCents,
+        // amount: amountInCents,
         customer_id: customerId,
         status: status,
       },

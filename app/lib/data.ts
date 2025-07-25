@@ -51,7 +51,7 @@ export async function fetchLatestInvoices()
       take: 5,
       select: {
         id: true,
-        amount: true,
+        // amount: true,
         customer: {
           select: {
             name: true,
@@ -64,7 +64,7 @@ export async function fetchLatestInvoices()
 
     const latestInvoices = data.map((invoice) => ({
       ...invoice,
-      amount: formatCurrency(invoice.amount),
+      // amount: formatCurrency(invoice.amount),
     }));
 
     return latestInvoices;
@@ -92,27 +92,27 @@ export async function fetchCardData()
 
     const invoiceCountPromise  = await prisma.invoice.count();
     const customerCountPromise = await prisma.customer.count();
-    const invoiceStatusPromise = await prisma.invoice.groupBy({
-      by: ['status'],
-      _sum:{
-        amount: true,
-      }
-    });
+    // const invoiceStatusPromise = await prisma.invoice.groupBy({
+    //   by: ['status'],
+    //   _sum:{
+    //     amount: true,
+    //   }
+    // });
 
-    const [invoiceCount, customerCount, invoiceStatus] = await Promise.all([
+    const [invoiceCount, customerCount, /*invoiceStatus*/] = await Promise.all([
       invoiceCountPromise,
       customerCountPromise,
-      invoiceStatusPromise,
+      // invoiceStatusPromise,
     ]);
 
-    const paid = invoiceStatus.find(item => item.status === 'paid')?._sum.amount || 0;
-    const pending = invoiceStatus.find(item => item.status === 'pending')?._sum.amount || 0;
+    // const paid = invoiceStatus.find(item => item.status === 'paid')?._sum.amount || 0;
+    // const pending = invoiceStatus.find(item => item.status === 'pending')?._sum.amount || 0;
 
     return {
       numberOfInvoices: invoiceCount,
       numberOfCustomers: customerCount,
-      totalPaidInvoices: formatCurrency(paid),
-      totalPendingInvoices: formatCurrency(pending),
+      // totalPaidInvoices: formatCurrency(paid),
+      // totalPendingInvoices: formatCurrency(pending),
     };
   } 
   catch (error) 
@@ -159,7 +159,7 @@ export async function fetchFilteredInvoices(query: string,currentPage: number)
         [
           { customer: { name: { contains: query, mode: 'insensitive' } } },
           { customer: { email: { contains: query, mode: 'insensitive' } } },
-          { amount: { equals: Number(query) || undefined } },
+          // { amount: { equals: Number(query) || undefined } },
           { date: { equals: new Date() || undefined } },
           { status: { contains: query, mode: 'insensitive' } },
         ],
@@ -196,7 +196,7 @@ export async function fetchInvoicesPages(query: string)
         [
           { customer: { name: { contains: query, mode: 'insensitive' } } },
           { customer: { email: { contains: query, mode: 'insensitive' } } },
-          { amount: { equals: Number(query) || undefined } },
+          // { amount: { equals: Number(query) || undefined } },
           { date: { equals: new Date() || undefined } },
           { status: { contains: query, mode: 'insensitive' } },
         ],
@@ -222,7 +222,7 @@ export async function fetchInvoiceById(id: string): Promise<InvoiceForm | null>
       select: {
         id: true,
         customer_id: true,
-        amount: true,
+        // amount: true,
         status: true,
         date: true,
       },
@@ -233,7 +233,7 @@ export async function fetchInvoiceById(id: string): Promise<InvoiceForm | null>
     return {
       id: data.id,
       customer_id: data.customer_id,
-      amount: data.amount / 100, 
+      // amount: data.amount / 100, 
       status: data.status as 'pending' | 'paid',
       date: data.date.toISOString().split('T')[0], 
     };
@@ -317,8 +317,9 @@ export async function fetchFilteredCustomers(query: string) {
         image_url: true,
         invoices: {
           select: {
-            amount: true,
+            // amount: true,
             status: true,
+            products: {}
           },
         },
       },
@@ -326,7 +327,6 @@ export async function fetchFilteredCustomers(query: string) {
       {
         name: 'asc'
       },
-
     });
 
     data.map((customer) => {
