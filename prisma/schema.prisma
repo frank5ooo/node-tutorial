@@ -51,6 +51,7 @@ model User {
 model Product {
   id          String @id @default(uuid())
   /// Datos del producto
+  name        String
   price       Int
   invoice_id  String?
   // relación a Invoice

@@ -123,31 +123,12 @@ export async function fetchCardData()
 }
 
 const ITEMS_PER_PAGE = 6;
+
 export async function fetchFilteredInvoices(query: string,currentPage: number)
 {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
-    // const invoices = await sql<InvoicesTable[]>`
-    //   SELECT
-    //     invoices.id,
-    //     invoices.amount,
-    //     invoices.date,
-    //     invoices.status,
-    //     customers.name,
-    //     customers.email,
-    //     customers.image_url
-    //   FROM invoices
-    //   JOIN customers ON invoices.customer_id = customers.id
-    //   WHERE
-    //     customers.name ILIKE ${`%${query}%`} OR
-    //     customers.email ILIKE ${`%${query}%`} OR
-    //     invoices.amount::text ILIKE ${`%${query}%`} OR
-    //     invoices.date::text ILIKE ${`%${query}%`} OR
-    //     invoices.status ILIKE ${`%${query}%`}
-    //   ORDER BY invoices.date DESC
-    //   LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
-    // `;
     const invoices = await prisma.invoice.findMany({
       orderBy: { date: 'desc' },
       take: ITEMS_PER_PAGE,
@@ -174,6 +155,61 @@ export async function fetchFilteredInvoices(query: string,currentPage: number)
     throw new Error('Failed to fetch invoices.');
   }
 }
+export async function fetchFilteredProducts(query: string,currentPage: number)
+{
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  try {
+    const products = await prisma.product.findMany({
+      take: ITEMS_PER_PAGE,
+      skip: offset,
+      where: 
+      {
+        OR: 
+        [
+          { name: { contains: query, mode: 'insensitive' } },
+          { price: { equals: Number(query)} },
+          // { status: { contains: query, mode: 'insensitive' } },
+        ],
+      },
+      
+    });
+    return products;
+  } 
+  catch (error) 
+  {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch products.');
+  }
+}
+
+export async function fetchProductPages(query: string) 
+{
+  try 
+  {
+    const data = await prisma.invoice.count({
+      where:{
+        OR: 
+        [
+          { customer: { name: { contains: query, mode: 'insensitive' } } },
+          { customer: { email: { contains: query, mode: 'insensitive' } } },
+          // { amount: { equals: Number(query) || undefined } },
+          { date: { equals: new Date() || undefined } },
+          { status: { contains: query, mode: 'insensitive' } },
+        ],
+      }
+    });
+
+    const totalPages = Math.ceil(Number(data) / ITEMS_PER_PAGE);
+    return totalPages;
+  } 
+  catch (error) 
+  {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch total number of invoices.');
+  }
+}
+
 
 export async function fetchInvoicesPages(query: string) 
 {
@@ -273,26 +309,30 @@ export async function fetchCustomers() {
   }
 }
 
+export async function fetchProducts() {
+  try {
+    const product = await prisma.product.findMany({
+      select:
+      {
+        id:true,
+        name: true,
+      },
+      orderBy:{
+        name: "asc",
+      }
+
+    });
+
+    return product;
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch all product.');
+  }
+}
+
 
 export async function fetchFilteredCustomers(query: string) {
   try {
-    // const data = await sql<CustomersTableType[]>`
-		// SELECT
-		//   customers.id,
-		//   customers.name,
-		//   customers.email,
-		//   customers.image_url,
-		//   COUNT(invoices.id) AS total_invoices,
-		//   SUM(CASE WHEN invoices.status = 'pending' THEN invoices.amount ELSE 0 END) AS total_pending,
-		//   SUM(CASE WHEN invoices.status = 'paid' THEN invoices.amount ELSE 0 END) AS total_paid
-		// FROM customers
-		// LEFT JOIN invoices ON customers.id = invoices.customer_id
-		// WHERE
-		//   customers.name ILIKE ${`%${query}%`} OR
-    //     customers.email ILIKE ${`%${query}%`}
-		// GROUP BY customers.id, customers.name, customers.email, customers.image_url
-		// ORDER BY customers.name ASC
-	  // `;
     const filters: any[] = [];
     
     if (query && query.trim() !== '') 

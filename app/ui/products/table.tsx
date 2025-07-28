@@ -1,10 +1,9 @@
-import Image from 'next/image';
-import { UpdateInvoice, DeleteInvoice } from '@/app/ui/invoices/buttons';
-import InvoiceStatus from '@/app/ui/invoices/status';
+import { UpdateProduct, DeleteProduct } from '@/app/ui/products/buttons';
+import ProductStatus from '@/app/ui/products/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
-import { fetchFilteredInvoices } from '@/app/lib/data';
+import { fetchFilteredProducts } from '@/app/lib/data';
 
-export default async function InvoicesTable({
+export default async function ProductsTable({
   query,
   currentPage,
 }: {
@@ -12,44 +11,36 @@ export default async function InvoicesTable({
   currentPage: number;
 }) 
 {
-  const invoices = await fetchFilteredInvoices(query, currentPage);
+  const products = await fetchFilteredProducts(query, currentPage);
 
   return (
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
         <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
           <div className="md:hidden">
-            {invoices?.map((invoice) => (
+            {products?.map((product) => (
               <div
-                key={invoice.id}
+                key={product.id}
                 className="mb-2 w-full rounded-md bg-white p-4"
               >
                 <div className="flex items-center justify-between border-b pb-4">
                   <div>
                     <div className="mb-2 flex items-center">
-                      <Image
-                        src={invoice.customer.image_url}
-                        className="mr-2 rounded-full"
-                        width={28}
-                        height={28}
-                        alt={`${invoice.customer.name}'s profile picture`}
-                      />
-                      <p>{invoice.customer.name}</p>
+                      
+                      <p>{product.name}</p>
                     </div>
-                    <p className="text-sm text-gray-500">{invoice.customer.email}</p>
                   </div>
-                  <InvoiceStatus status={invoice.status} />
+                  <ProductStatus invoice_id={product.invoice_id} />
                 </div>
                 <div className="flex w-full items-center justify-between pt-4">
                   <div>
                     <p className="text-xl font-medium">
-                      {formatCurrency(invoice.amount)}
+                      {formatCurrency(product.price)}
                     </p>
-                    <p>{formatDateToLocal(invoice.date.toISOString())}</p>
                   </div>
                   <div className="flex justify-end gap-2">
-                    <UpdateInvoice id={invoice.id} />
-                    <DeleteInvoice id={invoice.id} />
+                    <UpdateProduct id={product.id} />
+                    <DeleteProduct id={product.id} />
                   </div>
                 </div>
               </div>
@@ -59,16 +50,10 @@ export default async function InvoicesTable({
             <thead className="rounded-lg text-left text-sm font-normal">
               <tr>
                 <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
-                  Customer
-                </th>
-                <th scope="col" className="px-3 py-5 font-medium">
-                  Email
+                  Product
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
                   Amount
-                </th>
-                <th scope="col" className="px-3 py-5 font-medium">
-                  Date
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
                   Status
@@ -79,39 +64,27 @@ export default async function InvoicesTable({
               </tr>
             </thead>
             <tbody className="bg-white">
-              {invoices?.map((invoice) => (
+              {products?.map((product) => (
                 <tr
-                  key={invoice.id}
+                  key={product.id}
                   className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
                 >
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex items-center gap-3">
-                      <Image
-                        src={invoice.customer.image_url}
-                        className="rounded-full"
-                        width={28}
-                        height={28}
-                        alt={`${invoice.customer.name}'s profile picture`}
-                      />
-                      <p>{invoice.customer.name}</p>
+                      
+                      <p>{product.name}</p>
                     </div>
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    {invoice.customer.email}
+                    {formatCurrency(product.price)}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    {formatCurrency(invoice.amount)}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-3">
-                    {formatDateToLocal(invoice.date.toISOString())}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-3">
-                    <InvoiceStatus status={invoice.status} />
+                    <ProductStatus invoice_id={product.invoice_id} />
                   </td>
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex justify-end gap-3">
-                      <UpdateInvoice id={invoice.id} />
-                      <DeleteInvoice id={invoice.id} />
+                      <UpdateProduct id={product.id} />
+                      <DeleteProduct id={product.id} />
                     </div>
                   </td>
                 </tr>
