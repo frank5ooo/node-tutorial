@@ -36,20 +36,28 @@ const FormSchema = z.object({
         invalid_type_error: 'Please select an invoice status.',
     }),
     date: z.string(),
+    // productIds: z.string(),
 });
  
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 
 export async function createInvoice(prevState: State, formData: FormData)
 {
-  const productId = formData.get('productId');
+  const productIdsRaw = formData.get('productIds') as string;
+
+  const productIds = productIdsRaw
+    .split(',')                 // 🔁 convierte a string[]
+    .map((id) => id.trim())     // 🧽 limpia espacios
+    .filter(Boolean); 
+
 
   const validatedFields = CreateInvoice.safeParse({
     customerId: formData.get('customerId'),
     status: formData.get('status'),
+    // productIds: formData.get('productIds'),
   });
 
-  console.log(CreateInvoice);
+  // console.debug(productIds);
 
   if (!validatedFields.success) 
   {
@@ -59,7 +67,7 @@ export async function createInvoice(prevState: State, formData: FormData)
     };   
   }
 
-  const { customerId, status } = validatedFields.data;
+  const { customerId, status, /*productIds*/ } = validatedFields.data;
   const date = new Date();
   
   try 
@@ -70,10 +78,17 @@ export async function createInvoice(prevState: State, formData: FormData)
         status,
         date,
         products: {
-          connect: { id: productId as string },
+          connect: productIds.map((id: string ) => ({ id})),
         },
       }
     });
+
+    
+
+
+
+
+
   }
   catch (error) 
   {

@@ -1,5 +1,8 @@
 import SideNav from '@/app/ui/dashboard/sidenav';
  
+import 'primereact/resources/themes/lara-light-blue/theme.css'; // o cualquier otro tema
+import 'primereact/resources/primereact.min.css';
+import 'primeicons/primeicons.css';
 
 
 export default function Layout({ children }: { children: React.ReactNode }) {

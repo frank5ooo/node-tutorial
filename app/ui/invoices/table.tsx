@@ -13,7 +13,7 @@ export default async function InvoicesTable({
 }) 
 {
   const invoices = await fetchFilteredInvoices(query, currentPage);
-  console.log(invoices);
+
   return (
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
@@ -100,9 +100,11 @@ export default async function InvoicesTable({
                     {invoice.customer.email}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    {invoice.products.map((products) => (
+                    {/* {invoice.products.map((products) => (
                       <p key={products.id}>{formatCurrency(products.price)}</p>
-                    ))}
+                    ))} */}
+                    
+
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
                     {formatDateToLocal(invoice.date.toISOString())}
