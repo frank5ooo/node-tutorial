@@ -7,6 +7,7 @@ import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
 import { prisma } from './prisma';
+import { invoices } from './placeholder-data';
  
 // const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
@@ -17,7 +18,6 @@ export type State = {
   };
   message?: string | null;
 };
-
 
 export type StateProduct = {
   errors?: {
@@ -42,10 +42,11 @@ const CreateInvoice = FormSchema.omit({ id: true, date: true });
 
 export async function createInvoice(prevState: State, formData: FormData)
 {
+  const productId = formData.get('productId');
+
   const validatedFields = CreateInvoice.safeParse({
     customerId: formData.get('customerId'),
     status: formData.get('status'),
-
   });
 
   console.log(CreateInvoice);
@@ -59,17 +60,18 @@ export async function createInvoice(prevState: State, formData: FormData)
   }
 
   const { customerId, status } = validatedFields.data;
-  // const date = new Date().toISOString().split('T')[0];
   const date = new Date();
-
+  
   try 
   {
-    const respuesta = await prisma.invoice.create({ 
+    await prisma.invoice.create({ 
       data: {
-        // amount: amountInCents,
         customer_id: customerId,
         status,
-        date
+        date,
+        products: {
+          connect: { id: productId as string },
+        },
       }
     });
   }
@@ -107,17 +109,11 @@ export async function updateInvoice(
  
   try 
   {
-    // await sql`
-    //   UPDATE invoices
-    //   SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
-    //   WHERE id = ${id}
-    // `;
     await prisma.invoice.update({
       where: {
         id,
       },
       data: {
-        // amount: amountInCents,
         customer_id: customerId,
         status,
       },
@@ -125,7 +121,6 @@ export async function updateInvoice(
         products: true,
       }
     });
-
   } 
   catch (error) 
   {
@@ -138,13 +133,9 @@ export async function updateInvoice(
 
 export async function deleteInvoice(id: string) 
 {
-  // throw new Error('Failed to Delete Invoice');
- 
-  // Unreachable code block
-  // await sql`DELETE FROM invoices WHERE id = ${id}`;
   await prisma.invoice.delete({
     where: {
-      id // el ID del invoice a actualizar
+      id
     },
   });
 
@@ -223,4 +214,60 @@ export async function createProduct(prevState: StateProduct, formData: FormData)
   
   revalidatePath('/dashboard/products');
   redirect('/dashboard/products');
+}
+
+const UpdateProduct = FormSchemaProduct.omit({ id: true});
+
+export async function updateProduct(
+  id: string,
+  prevState: State,
+  formData: FormData,
+) 
+{
+  const validatedFields = UpdateProduct.safeParse({
+    price: formData.get('price'),
+    name: formData.get('name')
+  });
+ 
+  if (!validatedFields.success)
+  {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing Fields. Failed to Update Invoice.',
+    };
+  }
+ 
+  const { price, name } = validatedFields.data;
+ 
+  try 
+  {
+    await prisma.product.update({
+      where: {
+        id,
+      },
+      data: {
+        price,
+        name
+      },
+    });
+
+  } 
+  catch (error) 
+  {
+    return { message: 'Database Error: Failed to Update Invoice.' };
+  }
+ 
+  revalidatePath('/dashboard/products');
+  redirect('/dashboard/products');
+}
+
+export async function deleteProduct(id: string) 
+{
+  await prisma.product.delete({
+    where: {
+      id
+    },
+  });
+
+  revalidatePath('/dashboard/products');
 }

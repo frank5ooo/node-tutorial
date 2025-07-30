@@ -6,6 +6,7 @@ import {
   InvoicesTable,
   LatestInvoiceRaw,
   Revenue,
+  ProductsField,
 } from './definitions';
 import { formatCurrency } from './utils';
 import { prisma } from './prisma';
@@ -51,21 +52,29 @@ export async function fetchLatestInvoices()
       take: 5,
       select: {
         id: true,
-        // amount: true,
         customer: {
           select: {
             name: true,
             email: true,
             image_url: true,
+
+          }
+        },
+        products:{
+          select: {
+            price:true,
           }
         }
       }
     });
 
-    const latestInvoices = data.map((invoice) => ({
-      ...invoice,
-      // amount: formatCurrency(invoice.amount),
-    }));
+    const latestInvoices = data.map((invoice) => {
+      const total = invoice.products.reduce((sum, product) => sum + product.price, 0);
+      return {
+        ...invoice,
+        price: formatCurrency(total),
+      };
+    });
 
     return latestInvoices;
   } 
@@ -80,39 +89,37 @@ export async function fetchCardData()
 {
   try 
   {
-    // You can probably combine these into a single SQL query
-    // However, we are intentionally splitting them to demonstrate
-    // how to initialize multiple queries in parallel with JS.
-    // const invoiceCountPromise  = sql`SELECT COUNT(*) FROM invoices`;
-    // const customerCountPromise = sql`SELECT COUNT(*) FROM customers`;
-    // const invoiceStatusPromise = sql`SELECT
-    //      SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END) AS "paid",
-    //      SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) AS "pending"
-    //      FROM invoices`;
-
     const invoiceCountPromise  = await prisma.invoice.count();
     const customerCountPromise = await prisma.customer.count();
-    // const invoiceStatusPromise = await prisma.invoice.groupBy({
-    //   by: ['status'],
-    //   _sum:{
-    //     amount: true,
-    //   }
-    // });
 
-    const [invoiceCount, customerCount, /*invoiceStatus*/] = await Promise.all([
-      invoiceCountPromise,
-      customerCountPromise,
-      // invoiceStatusPromise,
-    ]);
+    const invoices = await prisma.invoice.findMany({
+      select: {
+        status: true,
+        products: {
+          select: {
+            price: true,
+          },
+        },
+      },
+    });
 
-    // const paid = invoiceStatus.find(item => item.status === 'paid')?._sum.amount || 0;
-    // const pending = invoiceStatus.find(item => item.status === 'pending')?._sum.amount || 0;
+    let paid = 0;
+    let pending = 0;
+
+    for (const invoice of invoices) {
+      const total = invoice.products.reduce((acc, p) => acc + p.price, 0);
+      if (invoice.status === 'paid') {
+        paid += total;
+      } else if (invoice.status === 'pending') {
+        pending += total;
+      }
+    }
 
     return {
-      numberOfInvoices: invoiceCount,
-      numberOfCustomers: customerCount,
-      // totalPaidInvoices: formatCurrency(paid),
-      // totalPendingInvoices: formatCurrency(pending),
+      numberOfInvoices: customerCountPromise,
+      numberOfCustomers: invoiceCountPromise,
+      totalPaidInvoices: formatCurrency(paid),
+      totalPendingInvoices: formatCurrency(pending),
     };
   } 
   catch (error) 
@@ -133,19 +140,36 @@ export async function fetchFilteredInvoices(query: string,currentPage: number)
       orderBy: { date: 'desc' },
       take: ITEMS_PER_PAGE,
       skip: offset,
-      include: { customer: true },
+      include: 
+      {
+        customer: true,
+        products: {
+          select:{
+            id:true,
+            price:true,
+          }
+        }
+
+      },
       where: 
       {
         OR: 
         [
           { customer: { name: { contains: query, mode: 'insensitive' } } },
           { customer: { email: { contains: query, mode: 'insensitive' } } },
-          // { amount: { equals: Number(query) || undefined } },
+          { 
+            products: {
+              some: {
+                price: {
+                  equals: Number(query) || undefined,
+                },
+              },
+            },
+          },
           { date: { equals: new Date() || undefined } },
           { status: { contains: query, mode: 'insensitive' } },
         ],
       },
-      
     });
     return invoices;
   } 
@@ -258,7 +282,6 @@ export async function fetchInvoiceById(id: string): Promise<InvoiceForm | null>
       select: {
         id: true,
         customer_id: true,
-        // amount: true,
         status: true,
         date: true,
       },
@@ -316,11 +339,11 @@ export async function fetchProducts() {
       {
         id:true,
         name: true,
+        invoice_id: true,
       },
       orderBy:{
         name: "asc",
       }
-
     });
 
     return product;
@@ -330,9 +353,10 @@ export async function fetchProducts() {
   }
 }
 
-
-export async function fetchFilteredCustomers(query: string) {
-  try {
+export async function fetchFilteredCustomers(query: string) 
+{
+  try 
+  {
     const filters: any[] = [];
     
     if (query && query.trim() !== '') 
@@ -344,7 +368,8 @@ export async function fetchFilteredCustomers(query: string) {
     }
 
     const data = await prisma.customer.findMany({
-      where: {
+      where: 
+      {
         OR: [
           { name:  { contains: query, mode: 'insensitive' } },
           { email: { contains: query, mode: 'insensitive'} },
@@ -355,11 +380,18 @@ export async function fetchFilteredCustomers(query: string) {
         name: true,
         email: true,
         image_url: true,
-        invoices: {
-          select: {
-            // amount: true,
+        invoices: 
+        {
+          select: 
+          {
             status: true,
-            products: {}
+            products: 
+            {
+              select: 
+              {
+                price:true,
+              },
+            },
           },
         },
       },
@@ -373,10 +405,10 @@ export async function fetchFilteredCustomers(query: string) {
       const totalInvoices = customer.invoices.length;
       const totalPending = customer.invoices
         .filter((i) => i.status === 'pending')
-        .reduce((sum, i) => sum + i.amount, 0);
+        .reduce((sum, i) => sum + i.products.reduce((pSum, p) => pSum + p.price, 0), 0);
       const totalPaid = customer.invoices
         .filter((i) => i.status === 'paid')
-        .reduce((sum, i) => sum + i.amount, 0);
+        .reduce((sum, i) => sum + i.products.reduce((pSum, p) => pSum + p.price, 0), 0);
 
       return {
         ...customer,

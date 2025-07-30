@@ -11,9 +11,9 @@ import { Button } from '@/app/ui/button';
 import { createInvoice, State } from '@/app/lib/actions';
 import { useActionState } from 'react';
 // import { Customer, Product } from '@prisma/client';
-import { CustomerField, ProdutsField } from '@/app/lib/definitions';
+import { CustomerField, ProductsField } from '@/app/lib/definitions';
 
-export default function Form({ customers, products }: {customers: CustomerField[], products: ProdutsField[]})
+export default function Form({ customers, products }: {customers: CustomerField[], products: ProductsField[]})
 {
   const initialState: State = { message: null, errors: {} };
   const [state, formAction] = useActionState(createInvoice, initialState);
@@ -63,7 +63,7 @@ export default function Form({ customers, products }: {customers: CustomerField[
           <div className="relative">
             <select
               id="product"
-              name="product"
+              name="productId"
               className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
               defaultValue=""
               aria-describedby="product-error"
@@ -71,11 +71,14 @@ export default function Form({ customers, products }: {customers: CustomerField[
               <option value="" disabled>
                 Select a product
               </option>
-              {products.map((products) => (
-                <option key={products.id} value={products.id}>
-                  {products.name}
-                </option>
-              ))}
+              {products
+                .filter((product) => product.invoice_id === null)
+                .map((product) => (
+                  <option key={product.id} value={product.id}>
+                    {product.name}
+                  </option>
+                ))
+              }
             </select>
             <TruckIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
           </div>

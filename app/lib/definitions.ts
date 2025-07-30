@@ -88,7 +88,8 @@ export type InvoiceForm = {
   date: string,
 };
 
-export type ProdutsField = {
+export type ProductsField = {
   id: string;
   name: string;
+  invoice_id: string | null;
 };

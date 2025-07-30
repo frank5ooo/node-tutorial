@@ -7,18 +7,18 @@ export default function ProductStatus({ invoice_id }: { invoice_id: string | nul
       className={clsx(
         'inline-flex items-center rounded-full px-2 py-1 text-xs',
         {
-          'bg-gray-100 text-gray-500': invoice_id === 'OnStock',
-          'bg-green-500 text-white': invoice_id === 'Sell',
+          'bg-gray-100 text-gray-500': invoice_id === null,
+          'bg-green-500 text-white': invoice_id != null,
         },
       )}
     >
       {invoice_id === null ? (
         <>
           OnStock
-          <ClockIcon className="ml-1 w-4 text-gray-500" />
+          <ClockIcon className="ml-1 w-4 text-gray-500"/>
         </>
       ) : null}
-      {invoice_id === 'Sell' ? (
+      {invoice_id != null ? (
         <>
           Sell
           <CheckIcon className="ml-1 w-4 text-white" />

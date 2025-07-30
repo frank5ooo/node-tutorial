@@ -4,7 +4,6 @@ import { lusitana } from '@/app/ui/fonts';
 import { Suspense } from 'react';
 import { RevenueChartSkeleton, LatestInvoicesSkeleton, CardsSkeleton } from '@/app/ui/skeletons';
 import CardWrapper from '@/app/ui/dashboard/cards';
-// import MyButton from './mybutton';
 
 export default async function Page() 
 {

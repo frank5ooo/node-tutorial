@@ -1,4 +1,4 @@
-import Form from '@/app/ui/invoices/create-form';
+import Form from '@/app/ui/invoices/edit-form';
 import Breadcrumbs from '@/app/ui/breadcrumbs';
 import { fetchInvoiceById, fetchCustomers, fetchProducts } from '@/app/lib/data';
 import { notFound } from 'next/navigation';
@@ -29,7 +29,7 @@ export default async function Page(props: { params: Promise<{ id: string }> })
             },
             ]}
         />
-        <Form customers={customers} products={products}/>
+        <Form invoice={invoice} customers={customers} products={products}/>
         </main>
 
 
