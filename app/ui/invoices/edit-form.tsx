@@ -1,26 +1,50 @@
 'use client';
 
 import { CustomerField, InvoiceForm, ProductsField } from '@/app/lib/definitions';
-import {CheckIcon, ClockIcon, CurrencyDollarIcon, UserCircleIcon} from '@heroicons/react/24/outline';
+import { CheckIcon, ClockIcon, UserCircleIcon, TruckIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
-import { updateInvoice, State, updateProduct } from '@/app/lib/actions';
-import { useActionState } from 'react';
+import { updateInvoice, State } from '@/app/lib/actions';
+import { useActionState, useEffect } from 'react';
+import { MultiSelect } from 'primereact/multiselect';
+import { useState } from 'react';
+import { Customer, Invoice, Product } from '@prisma/client';
+import { fetchProducts } from '@/app/lib/data';
+
+type SelectOption = {
+  id: string;
+  name: string;
+};
+type InvoiceWithProducts = Invoice & {
+  products: Product[];
+};
 
 export default function EditInvoiceForm(
-{
-  invoice,
-  customers,
-  products,
-}: {
-  invoice: InvoiceForm;
-  customers: CustomerField[];
-  products: ProductsField[];
-}) 
-{
-  const initialState: State = { message: null, errors: {} };
-  const updateInvoiceWithId = updateInvoice.bind(null, invoice.id);
-  const [state, formAction] = useActionState(updateInvoiceWithId, initialState);
+  {
+    invoice,
+    customers,
+    products,
+  }: {
+    invoice: InvoiceForm;
+    customers: Pick<Customer, 'id'|'name'>[];
+    products: Pick<Product, 'id'|'name'>[];
+  }) 
+  {
+    const initialState: State = { message: null, errors: {} };
+    
+    const [state, formAction] = useActionState(updateInvoice.bind(null, invoice.customer_id), initialState);
+    
+    // console.debug("updateInvoiceWithId",updateInvoiceWithId);
+    console.debug("state", state);
+
+    // console.log("initialSelectedProducts",initialSelectedProducts);
+
+    // const initialSelectedProducts1 = invoice.products.map(products => ({
+    //   name: products.name,
+    //   id: products.id,
+    // }));
+
+  const [selectedProducts, setSelectedProducts] = useState<SelectOption[]>();
 
   return (
     <form action={formAction}>
@@ -56,25 +80,19 @@ export default function EditInvoiceForm(
           <label htmlFor="product" className="mb-2 block text-sm font-medium">
             Choose product
           </label>
-          <div className="relative">
-            <select
-              id="product"
-              name="product"
-              className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-              defaultValue={invoice.customer_id}
-            >
-              <option value="" disabled>
-                Select a product
-              </option>
-              {products.map((product) => (
-                <option key={product.id} value={product.id}>
-                  {product.name}
-                </option>
-              ))}
-            </select>
-            <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
-          </div>
         </div>
+        <div className="card flex justify-content-center">
+          <TruckIcon className="relative pointer-events-none  left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
+          <MultiSelect
+            name='products'
+            value={selectedProducts}
+            onChange={(e) => setSelectedProducts(e.value)}
+            options={products}
+            placeholder="Select product"
+            className="w-full md:w-20rem"
+          />
+        </div>
+
 
         {/* Invoice Status */}
         <fieldset>

@@ -100,11 +100,7 @@ export default async function InvoicesTable({
                     {invoice.customer.email}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    {/* {invoice.products.map((products) => (
-                      <p key={products.id}>{formatCurrency(products.price)}</p>
-                    ))} */}
-                    
-
+                    <p>{formatCurrency(invoice.products.reduce((sum, product) => sum + product.price, 0))}</p>
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
                     {formatDateToLocal(invoice.date.toISOString())}
