@@ -33,47 +33,53 @@ const FormSchema = z.object({
   status: z.enum(['pending', 'paid'], {
     invalid_type_error: 'Please select an invoice status.',
   }),
-  date: z.string(),
-  product: z.string().array(),
+  date: z.date(),
+  product: z.string(),
 });
 
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 
-export async function createInvoice(prevState: State, formData: FormData) {
+export async function createInvoice(prevState: State, formData: FormData) 
+{
   const productIdsRaw = formData.get('productIds') as string;
-
-  const productIds = productIdsRaw
+  const product = productIdsRaw
     .split(',')                
     .map((id) => id.trim())
     .filter(Boolean);
 
+  console.debug(product);
 
   const validatedFields = CreateInvoice.safeParse({
     customerId: formData.get('customerId'),
     status: formData.get('status'),
-    // productIds: formData.get('productIds'),
+    product: formData.get('productIds'),
   });
-
-  // console.debug(productIds);
-
-  if (!validatedFields.success) {
+  
+  console.debug(validatedFields.error);
+  
+  if (!validatedFields.success) 
+  {
     return {
-      errors: validatedFields.error.flatten().fieldErrors,
       message: 'Missing Fields. Failed to Create Invoice.',
+      errors: validatedFields.error.flatten().fieldErrors,
     };
   }
-
-  const { customerId, status, /*productIds*/ } = validatedFields.data;
+  
+  const { customerId, status, /*product*/ } = validatedFields.data;
   const date = new Date();
+  
+  console.debug(validatedFields.data);
 
-  try {
+  try 
+  {
     await prisma.invoice.create({
-      data: {
+      data: 
+      {
         customer_id: customerId,
         status,
         date,
         products: {
-          connect: productIds.map((id: string) => ({ id })),
+          connect: product.map((id: string) => ({ id })),
         },
       }
     });
@@ -86,17 +92,50 @@ export async function createInvoice(prevState: State, formData: FormData) {
   redirect('/dashboard/invoices');
 }
 
-const UpdateInvoice = FormSchema.omit({ id: true, date: true });
+const UpdateInvoice = z.object({
+  customerId: z.string().nonempty(),
+  status: z.string().nonempty(),
+  // product: z.array(z.string().nonempty()), // Asegúrate de que 'product' sea un array de strings
+});
 
-export async function updateInvoice( id: string, prevState: State, formData: FormData): Promise<State>
+export async function updateInvoice(id: string, prevState: State, formData: FormData)
 {
+  const productRaw = formData.get("productIds") as string;
+  const selectedIds = productRaw
+    ? productRaw.split(",").filter(Boolean)
+    : [];
+
+  console.log("selectedIds", selectedIds);
+
+  const currentProducts = await prisma.product.findMany({
+    where: 
+    { 
+      invoice_id: id 
+    },
+    select: 
+    { 
+      id: true 
+    },
+  });
+
+  const currentIds = currentProducts.map((p) => p.id);
+  
+  console.log("currentIds", currentIds);
+
+  // Productos que se asignarán a la factura
+  const toAdd = selectedIds.filter((productId) => !currentIds.includes(productId));
+
+  console.log("toadd", toAdd);
+
+  // Productos que se desasignarán de la factura
+  const toRemove = currentIds.filter((productId) => !selectedIds.includes(productId));
+  
+  console.log("toRemove", toRemove);
+
   const validatedFields = UpdateInvoice.safeParse({
     customerId: formData.get('customerId'),
     status: formData.get('status'),
-    product: formData.getAll('products'),
   });
-
-  // console.log(validatedFields);
 
   if (!validatedFields.success) {
     return {
@@ -105,41 +144,45 @@ export async function updateInvoice( id: string, prevState: State, formData: For
     };
   }
 
-  const { customerId, product, status } = validatedFields.data;
-
-  console.debug("customer",customerId);
+  const { customerId, status } = validatedFields.data;
 
   try {
-    await prisma.invoice.update({
-      where: 
-      {
-        id,
-      },
-      data: {
-        customer_id: customerId,
-        status,
-        products: {
-          connect: product.map(id => ({ id })),
+    await prisma.$transaction([
+      // Asignar factura a productos nuevos
+      ...toAdd.map((productId) =>
+        prisma.product.update({
+          where: { id: productId },
+          data: { invoice_id: id }, // Aquí va el invoice id (id)
+        })
+      ),
+      // Desasignar factura de productos removidos
+      ...toRemove.map((productId) =>
+        prisma.product.update({
+          where: { id: productId },
+          data: { invoice_id: null },
+        })
+      ),
+      // Actualizar datos de la factura
+      prisma.invoice.update({
+        where: { id },
+        data: {
+          customer_id: customerId,
+          status,
+          // Ya no es necesario conectar productos aquí, porque lo haces en productos directamente
         },
-      },
-      include: 
-      {
-        products: true,
-      }
-    });
+      }),
+    ]);
 
-    return {
-      message: 'Factura actualizada correctamente.',
-      errors: {},
-    };
-  }
-  catch (error) {
+    
+  } catch (error) {
     return { message: 'Database Error: Failed to Update Invoice.' };
   }
 
   revalidatePath('/dashboard/invoices');
   redirect('/dashboard/invoices');
+
 }
+
 
 export async function deleteInvoice(id: string) {
   await prisma.invoice.delete({

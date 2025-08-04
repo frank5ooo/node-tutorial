@@ -1,15 +1,5 @@
-import {
-  CustomerField,
-  CustomersTableType,
-  InvoiceForm,
-  InvoicesTable,
-  LatestInvoiceRaw,
-  Revenue,
-  ProductsField,
-} from './definitions';
 import { formatCurrency } from './utils';
 import { prisma } from './prisma';
-
 
 export async function fetchRevenue() {
   try {
@@ -140,12 +130,7 @@ export async function fetchFilteredInvoices(query: string,currentPage: number)
       include: 
       {
         customer: true,
-        products: {
-          select: {
-            id:true,
-            price:true,
-          }
-        }
+        products: true,
       },
       where: 
       {
@@ -262,7 +247,7 @@ export async function fetchInvoicesPages(query: string)
   }
 }
 
-export async function fetchInvoiceById(id: string): Promise<InvoiceForm | null> 
+export async function fetchInvoiceById(id: string)
 {
   try 
   {
@@ -273,17 +258,13 @@ export async function fetchInvoiceById(id: string): Promise<InvoiceForm | null>
         customer_id: true,
         status: true,
         date: true,
+        products: true,
       },
     });
 
     if (!data) return null;
 
-    return {
-      id: data.id,
-      customer_id: data.customer_id,
-      status: data.status as 'pending' | 'paid',
-      date: data.date.toISOString().split('T')[0], 
-    };
+    return data;
   } 
   catch (error) 
   {
@@ -315,14 +296,15 @@ export async function fetchCustomers()
   }
 }
 
-export async function 
-
-
-fetchProducts() 
+export async function fetchProducts() 
 {
   try 
   {
     const product = await prisma.product.findMany({
+      where:
+      {
+        invoice_id: null,
+      },
       select:
       {
         id:true,
@@ -343,3 +325,34 @@ fetchProducts()
   }
 }
 
+export async function fetchProductsbyId(id: string)
+{
+  try 
+  {
+    const data = await prisma.product.findMany({
+      where:
+      {
+        OR:[
+          {invoice_id: null},
+          {invoice_id: id},
+        ]
+      },
+      select:
+      {
+        id:true,
+        name: true,
+        invoice_id: true,
+      },
+      orderBy:{
+        name: "asc",
+      }
+    });
+
+    return data
+  } 
+  catch (err) 
+  {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch all product.');
+  }
+}

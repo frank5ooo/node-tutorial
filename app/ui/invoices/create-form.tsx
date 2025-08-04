@@ -10,26 +10,30 @@ import {
 import { Button } from '@/app/ui/button';
 import { createInvoice, State } from '@/app/lib/actions';
 import { useActionState } from 'react';
-// import { Customer, Product } from '@prisma/client';
-import { CustomerField, ProductsField } from '@/app/lib/definitions';
-import { MultiSelectInput } from 'multi-select-input';
+import { Customer, Invoice, Product } from '@prisma/client';
 import { MultiSelect } from 'primereact/multiselect';
 import { useState } from 'react';
-
 
 type SelectOption = {
   id: string;
   name: string;
 };      
 
-export default function Form({ customers, products }: {customers: CustomerField[], products: SelectOption[]})
+export default function Form(
+{
+  customers, 
+  products,
+}: { 
+  customers: Pick<Customer, 'id'|'name'>[], 
+  products:  Pick<Product, 'id'|'name'>[],
+})
 {
   const initialState: State = { message: null, errors: {} };
   const [state, formAction] = useActionState(createInvoice, initialState);
 
   const [selectedProducts, setSelectedProducts] = useState<SelectOption[]>([]);
 
-  // console.debug("products", products);
+  console.debug("products", products);
 
   return (
     <form action={formAction}>
@@ -75,36 +79,32 @@ export default function Form({ customers, products }: {customers: CustomerField[
           Choose a product
         </label>
         <div className="relative">
-          {/* <option value="" disabled>
-            Select a product
-          </option> */}
           <MultiSelect
             value={selectedProducts} 
             onChange={(e) => setSelectedProducts(e.value) } 
             options={products} 
-            optionLabel="name" 
-            // placeholder="Select products" 
+            optionLabel="products" 
+            placeholder="Select products" 
             className="w-full md:w-20rem ms-6" 
           />
           <TruckIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-          </div>
-          <input
-            type="hidden"
-            name="productIds"
-            value={selectedProducts.map((p) => p.id).join(',')}
-          />
-          
-          <div id="customer-error" aria-live="polite" aria-atomic="true">
-            {
-              state.errors?.customerId &&
-                state.errors.customerId.map((error: string) => (
-                  <p className="mt-2 text-sm text-red-500" key={error}>
-                    {error}
-                  </p>
-              ))
-            }
-          </div>
         </div>
+        <input
+          type="hidden"
+          name="productIds"
+          value={selectedProducts.map((p) => p.id).join(',')}
+        />
+        <div id="customer-error" aria-live="polite" aria-atomic="true">
+          {
+            state.errors?.customerId &&
+              state.errors.customerId.map((error: string) => (
+                <p className="mt-2 text-sm text-red-500" key={error}>
+                  {error}
+                </p>
+            ))
+          }
+        </div>
+      </div>
 
       {/* Invoice Status */}
       <div className="mb-4">

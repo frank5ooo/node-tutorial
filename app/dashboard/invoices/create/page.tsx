@@ -12,8 +12,7 @@ export default async function Page()
     name: product.name,
   }));
 
-
-  // console.debug("options", options);
+  console.debug("options", options);
   return (
     <main>
       <Breadcrumbs

@@ -1,6 +1,5 @@
 'use client';
 
-import { CustomerField, InvoiceForm, ProductsField } from '@/app/lib/definitions';
 import { CheckIcon, ClockIcon, UserCircleIcon, TruckIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
@@ -9,7 +8,6 @@ import { useActionState, useEffect } from 'react';
 import { MultiSelect } from 'primereact/multiselect';
 import { useState } from 'react';
 import { Customer, Invoice, Product } from '@prisma/client';
-import { fetchProducts } from '@/app/lib/data';
 
 type SelectOption = {
   id: string;
@@ -20,35 +18,31 @@ type InvoiceWithProducts = Invoice & {
 };
 
 export default function EditInvoiceForm(
-  {
-    invoice,
-    customers,
-    products,
-  }: {
-    invoice: InvoiceForm;
-    customers: Pick<Customer, 'id'|'name'>[];
-    products: Pick<Product, 'id'|'name'>[];
-  }) 
-  {
-    const initialState: State = { message: null, errors: {} };
-    
-    const [state, formAction] = useActionState(updateInvoice.bind(null, invoice.customer_id), initialState);
-    
-    // console.debug("updateInvoiceWithId",updateInvoiceWithId);
-    console.debug("state", state);
+{
+  invoice,
+  customers,
+  products,
+}: {
+  invoice: InvoiceWithProducts;
+  customers: Pick<Customer, 'id'|'name'>[];
+  products: Pick<Product, 'id'|'name'>[];
+}) 
+{
+  const initialState: State = { message: null, errors: {} };
+  
+  const [state, formAction] = useActionState(updateInvoice.bind(null, invoice.id), initialState);
 
-    // console.log("initialSelectedProducts",initialSelectedProducts);
+  const [selectedProducts, setSelectedProducts] = useState<SelectOption[]>([]);
 
-    // const initialSelectedProducts1 = invoice.products.map(products => ({
-    //   name: products.name,
-    //   id: products.id,
-    // }));
-
-  const [selectedProducts, setSelectedProducts] = useState<SelectOption[]>();
+  useEffect(() => {
+    const selected = products.filter((product) =>
+      invoice.products.some((p) => p.id === product.id)
+    );
+    setSelectedProducts(selected);
+  }, [invoice.products, products]);
 
   return (
     <form action={formAction}>
-
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Customer Name */}
         <div className="mb-4">
@@ -81,18 +75,22 @@ export default function EditInvoiceForm(
             Choose product
           </label>
         </div>
-        <div className="card flex justify-content-center">
-          <TruckIcon className="relative pointer-events-none  left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
+        <div className="relative">
           <MultiSelect
-            name='products'
-            value={selectedProducts}
-            onChange={(e) => setSelectedProducts(e.value)}
-            options={products}
-            placeholder="Select product"
-            className="w-full md:w-20rem"
+            value={selectedProducts} 
+            onChange={(e) => setSelectedProducts(e.value)} 
+            options={products} 
+            optionLabel="name" 
+            placeholder="Select products" 
+            className="w-full md:w-20rem ms-6" 
           />
+          <TruckIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
         </div>
-
+        <input
+          type="hidden"
+          name="productIds"
+          value={selectedProducts?.map((p) => p.id).join(',')}
+        />
 
         {/* Invoice Status */}
         <fieldset>

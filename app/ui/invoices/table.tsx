@@ -3,6 +3,13 @@ import { UpdateInvoice, DeleteInvoice } from '@/app/ui/invoices/buttons';
 import InvoiceStatus from '@/app/ui/invoices/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
 import { fetchFilteredInvoices } from '@/app/lib/data';
+// import React from 'react';
+import dynamic from 'next/dynamic';
+import HoverModal from './app';
+// import { lazy, Suspense } from 'react';
+// import Loading from './Loading.js';
+
+// const HoverModal = lazy(() => import('./app'));
 
 export default async function InvoicesTable({
   query,
@@ -13,6 +20,11 @@ export default async function InvoicesTable({
 }) 
 {
   const invoices = await fetchFilteredInvoices(query, currentPage);
+  
+  
+  // const HoverModal = dynamic(() => import('./app'), {
+  //   ssr: false, // ❗ importante si usa "use client"
+  // });
 
   return (
     <div className="mt-6 flow-root">
@@ -73,6 +85,9 @@ export default async function InvoicesTable({
                 <th scope="col" className="px-3 py-5 font-medium">
                   Status
                 </th>
+                <th scope="col" className="px-3 py-5 font-medium">
+                  Products
+                </th>
                 <th scope="col" className="relative py-3 pl-6 pr-3">
                   <span className="sr-only">Edit</span>
                 </th>
@@ -108,6 +123,20 @@ export default async function InvoicesTable({
                   <td className="whitespace-nowrap px-3 py-3">
                     <InvoiceStatus status={invoice.status} />
                   </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                      <HoverModal
+                        content={
+                          <div>
+                            {invoice.products.map((product) => (
+                              <div key={product.name}>
+                                {product.name}: {formatCurrency(product.price)}
+                              </div>
+                            ))}
+                          </div>
+                        }>
+                        <button className="underline text-blue-600">Pasa el mouse</button>
+                      </HoverModal>
+                  </td>    
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex justify-end gap-3">
                       <UpdateInvoice id={invoice.id} />
