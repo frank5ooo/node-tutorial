@@ -152,7 +152,7 @@ export async function updateInvoice(id: string, prevState: State, formData: Form
       ...toAdd.map((productId) =>
         prisma.product.update({
           where: { id: productId },
-          data: { invoice_id: id }, // Aquí va el invoice id (id)
+          data: { invoice_id: id },
         })
       ),
       // Desasignar factura de productos removidos
@@ -182,7 +182,6 @@ export async function updateInvoice(id: string, prevState: State, formData: Form
   redirect('/dashboard/invoices');
 
 }
-
 
 export async function deleteInvoice(id: string) {
   await prisma.invoice.delete({
@@ -308,4 +307,29 @@ export async function deleteProduct(id: string) {
   });
 
   revalidatePath('/dashboard/products');
+}
+
+export async function fetchProducts(id:string) 
+{
+  try 
+  {
+    const product = await prisma.product.findMany({
+      where:
+      {
+        invoice_id: id,
+      },
+      select:
+      {
+        name: true,
+        price: true, 
+      }
+    });
+
+    return product;
+  } 
+  catch (err) 
+  {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch all product.');
+  }
 }

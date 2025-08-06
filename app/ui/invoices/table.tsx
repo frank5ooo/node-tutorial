@@ -3,13 +3,7 @@ import { UpdateInvoice, DeleteInvoice } from '@/app/ui/invoices/buttons';
 import InvoiceStatus from '@/app/ui/invoices/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
 import { fetchFilteredInvoices } from '@/app/lib/data';
-// import React from 'react';
-import dynamic from 'next/dynamic';
 import HoverModal from './app';
-// import { lazy, Suspense } from 'react';
-// import Loading from './Loading.js';
-
-// const HoverModal = lazy(() => import('./app'));
 
 export default async function InvoicesTable({
   query,
@@ -17,14 +11,8 @@ export default async function InvoicesTable({
 }: {
   query: string;
   currentPage: number;
-}) 
-{
+}) {
   const invoices = await fetchFilteredInvoices(query, currentPage);
-  
-  
-  // const HoverModal = dynamic(() => import('./app'), {
-  //   ssr: false, // ❗ importante si usa "use client"
-  // });
 
   return (
     <div className="mt-6 flow-root">
@@ -54,7 +42,7 @@ export default async function InvoicesTable({
                 </div>
                 <div className="flex w-full items-center justify-between pt-4">
                   <div>
-                      {invoice.products.map((p) => <p key={p.id}>{p.price}</p>)}
+                    <p>{formatCurrency(invoice.price)}</p>
                   </div>
                   <div>
                     <p>{formatDateToLocal(invoice.date.toISOString())}</p>
@@ -115,7 +103,7 @@ export default async function InvoicesTable({
                     {invoice.customer.email}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    <p>{formatCurrency(invoice.products.reduce((sum, product) => sum + product.price, 0))}</p>
+                    <p>{formatCurrency(invoice.price)}</p>
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
                     {formatDateToLocal(invoice.date.toISOString())}
@@ -124,19 +112,19 @@ export default async function InvoicesTable({
                     <InvoiceStatus status={invoice.status} />
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                      <HoverModal
-                        content={
-                          <div>
-                            {invoice.products.map((product) => (
-                              <div key={product.name}>
-                                {product.name}: {formatCurrency(product.price)}
-                              </div>
-                            ))}
-                          </div>
-                        }>
-                        <button className="underline text-blue-600">Pasa el mouse</button>
-                      </HoverModal>
-                  </td>    
+                    <HoverModal id={invoice.id}>
+                      {/* // content={
+                        //   <div>
+                        //     {invoice.products.map((product) => (
+                        //       <div key={product.name}>
+                        //         {product.name}: {formatCurrency(product.price)}
+                        //       </div>
+                        //     ))}
+                        //   </div>
+                        // }
+                         */}
+                    </HoverModal>
+                  </td>
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex justify-end gap-3">
                       <UpdateInvoice id={invoice.id} />
