@@ -3,7 +3,7 @@ import { UpdateInvoice, DeleteInvoice } from '@/app/ui/invoices/buttons';
 import InvoiceStatus from '@/app/ui/invoices/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
 import { fetchFilteredInvoices } from '@/app/lib/data';
-import HoverModal from './app';
+import MarkdownEditor from './MarkdownEditor';
 
 export default async function InvoicesTable({
   query,
@@ -112,18 +112,7 @@ export default async function InvoicesTable({
                     <InvoiceStatus status={invoice.status} />
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    <HoverModal id={invoice.id}>
-                      {/* // content={
-                        //   <div>
-                        //     {invoice.products.map((product) => (
-                        //       <div key={product.name}>
-                        //         {product.name}: {formatCurrency(product.price)}
-                        //       </div>
-                        //     ))}
-                        //   </div>
-                        // }
-                         */}
-                    </HoverModal>
+                      <MarkdownEditor id={invoice.id}/>
                   </td>
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex justify-end gap-3">

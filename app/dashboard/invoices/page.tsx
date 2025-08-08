@@ -7,7 +7,7 @@ import { Suspense } from 'react';
 import { InvoicesTableSkeleton } from '@/app/ui/skeletons';
 import { fetchInvoicesPages } from '@/app/lib/data';
 import { Metadata } from 'next';
- 
+ import { fetchRevenue } from '@/app/lib/data';
 export const metadata: Metadata = {
   title: 'Invoices',
 }
@@ -22,7 +22,7 @@ export default async function Page(props: {
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
   const totalPages = await fetchInvoicesPages(query);
- 
+
   return (
     <div className="w-full">
       <div className="flex w-full items-center justify-between">

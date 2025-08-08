@@ -6,8 +6,8 @@ export async function fetchRevenue() {
     // Artificially delay a response for demo purposes.
     // Don't do this in production :)
 
-    // console.log('Fetching revenue data...');
-    // await new Promise((resolve) => setTimeout(resolve, 3000));
+    console.log('Fetching revenue data...');
+    await new Promise((resolve) => setTimeout(resolve, 3000));
 
     // const data = await sql<Revenue[]>`SELECT * FROM revenue`;
     const data = await prisma.revenue.findMany();
@@ -109,7 +109,8 @@ export async function fetchCardData() {
 
 const ITEMS_PER_PAGE = 6;
 
-export async function fetchFilteredInvoices(query: string, currentPage: number) {
+export async function fetchFilteredInvoices(query: string, currentPage: number) 
+{
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
   const maybePrice = Number(query) * 100;
   const isNumber = !isNaN(maybePrice);
@@ -151,7 +152,6 @@ export async function fetchFilteredInvoices(query: string, currentPage: number) 
           ],
       },
     });
-
 
     return invoices.map(({products, ...invoice}) => {
       const price = products.reduce((sum, prod) => sum + prod.price, 0);

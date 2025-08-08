@@ -33,6 +33,7 @@ export default function Form(
 
   const [selectedProducts, setSelectedProducts] = useState<SelectOption[]>([]);
 
+  console.log("setSelectedProducts",setSelectedProducts);
   console.debug("products", products);
 
   return (
@@ -81,9 +82,9 @@ export default function Form(
         <div className="relative">
           <MultiSelect
             value={selectedProducts} 
-            onChange={(e) => setSelectedProducts(e.value) } 
+            onChange={(e) => setSelectedProducts(e.value)} 
             options={products} 
-            optionLabel="products" 
+            optionLabel="name" 
             placeholder="Select products" 
             className="w-full md:w-20rem ms-6" 
           />
@@ -95,14 +96,14 @@ export default function Form(
           value={selectedProducts.map((p) => p.id).join(',')}
         />
         <div id="customer-error" aria-live="polite" aria-atomic="true">
-          {
-            state.errors?.customerId &&
-              state.errors.customerId.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
-                  {error}
-                </p>
-            ))
-          }
+        {
+          state.errors?.customerId &&
+            state.errors.customerId.map((error: string) => (
+              <p className="mt-2 text-sm text-red-500" key={error}>
+                {error}
+              </p>
+          ))
+        }
         </div>
       </div>
 

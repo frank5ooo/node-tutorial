@@ -1,9 +1,8 @@
 'use client'
 
-import { useState, Suspense, lazy, useEffect } from 'react';
+import { useState, Suspense} from 'react';
 import Loading from './loading';
 import { fetchProducts } from '@/app/lib/actions';
-import { formatCurrency } from '@/app/lib/utils';
 import { LinkIcon } from '@heroicons/react/24/outline';
 import 'react-tooltip/dist/react-tooltip.css'
 import * as React from 'react';
@@ -18,42 +17,28 @@ const LightTooltip = styled(({ className, ...props }: TooltipProps) => (
     backgroundColor: theme.palette.common.white,
     color: 'rgba(0, 0, 0, 0.87)',
     boxShadow: theme.shadows[1],
-    fontSize: 11,
+    fontSize: 15,
     maxWidth: 300, // limita ancho para que no sea muy ancho
   },
 }));
 
-//*
+
 import MarkdownPreview from './clickModal';
-import clsx from 'clsx';
-/*/
-const MarkdownPreview = lazy(() => import('./clickModal'));
-//*/
 
-export default function MarkdownEditor({ id }: { id: string }) {
-  const [markdown, setMarkdown] = useState('');
+
+export default function MarkdownEditor({ id }: { id: string }) 
+{
   const [open, setOpen] = React.useState(false);
-  const [loading, setLoading] = useState(false);
-
-  async function loadProducts() {
-    if(!markdown) {
-      setLoading(true);
-      const products = await fetchProducts(id);
-      const markdownString = products
-        .map(p => `- ${p.name}: ${formatCurrency(p.price)}`)
-        .join('\n');
-      setMarkdown(markdownString);
-      setLoading(false);
-    }
-  }
-
+  const [fetchDatos, setFetchDatos] = useState<ReturnType<typeof fetchProducts>>();
+  
   const handleTooltipClose = () => {
     setOpen(false);
   };
-
+  
   const handleTooltipOpen = () => {
-    loadProducts();
     setOpen(true);
+
+    if(!fetchDatos) setFetchDatos(fetchProducts(id));
   };
 
   return (
@@ -67,7 +52,11 @@ export default function MarkdownEditor({ id }: { id: string }) {
             disableFocusListener
             disableHoverListener
             disableTouchListener
-            title={loading ? <Loading /> : <MarkdownPreview markdown={markdown} />}
+            title={(
+              <Suspense fallback={<Loading />}>
+                <MarkdownPreview markdown={fetchDatos} />
+              </Suspense>
+            )}
           >
             <button
               onClick={handleTooltipOpen}
@@ -83,7 +72,6 @@ export default function MarkdownEditor({ id }: { id: string }) {
           </LightTooltip>
         </div>
       </ClickAwayListener>
-      <hr />
     </>
   );
 }

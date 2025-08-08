@@ -30,6 +30,6 @@
     ".next/types/**/*.ts",
     "app/lib/placeholder-data.ts",
     "scripts/seed.js"
-, "app/ui/invoices/app.tsx", "app/ui/invoices/clickModal.tsx"  ],
+, "app/ui/invoices/MarkdownEditor.tsx", "app/ui/invoices/clickModal.tsx"  ],
   "exclude": ["node_modules"]
 }
