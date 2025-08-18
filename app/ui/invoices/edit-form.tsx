@@ -1,13 +1,21 @@
-'use client';
+"use client";
 
-import { CheckIcon, ClockIcon, UserCircleIcon, TruckIcon } from '@heroicons/react/24/outline';
-import Link from 'next/link';
-import { Button } from '@/app/ui/button';
-import { updateInvoice, State } from '@/app/lib/actions';
-import { useActionState, useEffect } from 'react';
-import { MultiSelect } from 'primereact/multiselect';
-import { useState } from 'react';
-import { Customer, Invoice, Product } from '@prisma/client';
+import {
+  CheckIcon,
+  ClockIcon,
+  UserCircleIcon,
+  TruckIcon,
+} from "@heroicons/react/24/outline";
+import Link from "next/link";
+import { Button } from "@/app/ui/button";
+import { updateInvoice } from "@/app/lib/actions/updateInvoice";
+import { useActionState, useEffect } from "react";
+import { MultiSelect } from "primereact/multiselect";
+import { useState } from "react";
+import { Customer, Invoice, Product } from "@prisma/client";
+import { State } from "@/app/lib/actions";
+import { useAction } from "next-safe-action/hooks";
+import { useRouter } from "next/navigation";
 
 type SelectOption = {
   id: string;
@@ -17,21 +25,30 @@ type InvoiceWithProducts = Invoice & {
   products: Product[];
 };
 
-export default function EditInvoiceForm(
-{
+export default function EditInvoiceForm({
   invoice,
   customers,
   products,
 }: {
   invoice: InvoiceWithProducts;
-  customers: Pick<Customer, 'id'|'name'>[];
-  products: Pick<Product, 'id'|'name'>[];
-}) 
-{
-  const initialState: State = { message: null, errors: {} };
-  
-  const [state, formAction] = useActionState(updateInvoice.bind(null, invoice.id), initialState);
+  customers: Pick<Customer, "id" | "name">[];
+  products: Pick<Product, "id" | "name">[];
+}) {
+  const { executeAsync, hasErrored } = useAction(updateInvoice);
+  const router = useRouter();
 
+  async function handleSubmit(formData: FormData) {
+    try {
+      const { data, ...errors } = await executeAsync(formData);
+      if (errors.validationErrors || errors.serverError) {
+        throw errors;
+      } else {
+        router.push("/dashboard/invoices");
+      }
+    } catch (errors) {
+      console.log("errors", errors);
+    }
+  }
   const [selectedProducts, setSelectedProducts] = useState<SelectOption[]>([]);
 
   useEffect(() => {
@@ -42,7 +59,11 @@ export default function EditInvoiceForm(
   }, [invoice.products, products]);
 
   return (
-    <form action={formAction}>
+    <form action={handleSubmit}>
+      {hasErrored && "AHHHHHHHHHHH"}
+
+      <input type="hidden" name="invoiceId" value={invoice.id} />
+
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Customer Name */}
         <div className="mb-4">
@@ -77,19 +98,19 @@ export default function EditInvoiceForm(
         </div>
         <div className="relative">
           <MultiSelect
-            value={selectedProducts} 
-            onChange={(e) => setSelectedProducts(e.value)} 
-            options={products} 
-            optionLabel="name" 
-            placeholder="Select products" 
-            className="w-full md:w-20rem ms-6" 
+            value={selectedProducts}
+            onChange={(e) => setSelectedProducts(e.value)}
+            options={products}
+            optionLabel="name"
+            placeholder="Select products"
+            className="w-full md:w-20rem ms-6"
           />
           <TruckIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
         </div>
         <input
           type="hidden"
           name="productIds"
-          value={selectedProducts?.map((p) => p.id).join(',')}
+          value={selectedProducts?.map((p) => p.id).join(",")}
         />
 
         {/* Invoice Status */}
@@ -105,7 +126,7 @@ export default function EditInvoiceForm(
                   name="status"
                   type="radio"
                   value="pending"
-                  defaultChecked={invoice.status === 'pending'}
+                  defaultChecked={invoice.status === "pending"}
                   className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
                 />
                 <label
@@ -121,7 +142,7 @@ export default function EditInvoiceForm(
                   name="status"
                   type="radio"
                   value="paid"
-                  defaultChecked={invoice.status === 'paid'}
+                  defaultChecked={invoice.status === "paid"}
                   className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
                 />
                 <label

@@ -1,45 +1,56 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
+import Link from "next/link";
 import {
   CheckIcon,
   ClockIcon,
   UserCircleIcon,
   TruckIcon,
-} from '@heroicons/react/24/outline';
-import { Button } from '@/app/ui/button';
-import { State } from '@/app/lib/actions';
-import { useActionState } from 'react';
-import { Customer, Invoice, Product } from '@prisma/client';
-import { MultiSelect } from 'primereact/multiselect';
-import { useState } from 'react';
-import { createInvoice } from '@/app/lib/actions/createInvoice';
-
+} from "@heroicons/react/24/outline";
+import { Button } from "@/app/ui/button";
+import { State } from "@/app/lib/actions";
+import { Customer, Invoice, Product } from "@prisma/client";
+import { MultiSelect } from "primereact/multiselect";
+import { ReactEventHandler, useActionState, useState } from "react";
+import { createInvoice } from "@/app/lib/actions/createInvoice";
+import { useAction } from "next-safe-action/hooks";
+import { useRouter } from "next/navigation";
 
 type SelectOption = {
   id: string;
   name: string;
-};      
+};
 
-export default function Form(
-{
-  customers, 
+export default function Form({
+  customers,
   products,
-}: { 
-  customers: Pick<Customer, 'id'|'name'>[], 
-  products:  Pick<Product, 'id'|'name'>[],
-})
-{
-  const initialState: State = { message: null, errors: {} };
-  const [state, formAction] = useActionState(createInvoice, initialState);
-
+}: {
+  customers: Pick<Customer, "id" | "name">[];
+  products: Pick<Product, "id" | "name">[];
+}) {
   const [selectedProducts, setSelectedProducts] = useState<SelectOption[]>([]);
+  const { executeAsync, hasErrored } = useAction(createInvoice);
+  const router = useRouter();
 
-  console.log("setSelectedProducts",setSelectedProducts);
-  console.debug("products", products);
+  async function handleSubmit(formData: FormData) {
+    // Validaciones custom del front
+    console.log(formData.get("customerId"));
+    try {
+      const { data, ...errors } = await executeAsync(formData);
+      if (errors.validationErrors || errors.serverError) {
+        throw errors;
+      } else {
+        router.push("/dashboard/invoices");
+      }
+    } catch (errors) {
+      console.log(errors);
+    }
+  }
 
   return (
-    <form action={formAction}>
+    <form action={handleSubmit}>
+      {hasErrored && "AHHHHHHHHHHH"}
+
       {/* Customer Name */}
       <div className="mb-4">
         <label htmlFor="customer" className="mb-2 block text-sm font-medium">
@@ -65,14 +76,11 @@ export default function Form(
           <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
         </div>
         <div id="customer-error" aria-live="polite" aria-atomic="true">
-          {
-            state.errors?.customerId &&
-              state.errors.customerId.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
-                  {error}
-                </p>
-            ))
-          }
+          {/* {customers.map((error: string) => (
+            <p className="mt-2 text-sm text-red-500" key={error}>
+              {error}
+            </p>
+          ))} */}
         </div>
       </div>
 
@@ -83,29 +91,27 @@ export default function Form(
         </label>
         <div className="relative">
           <MultiSelect
-            value={selectedProducts} 
-            onChange={(e) => setSelectedProducts(e.value)} 
-            options={products} 
-            optionLabel="name" 
-            placeholder="Select products" 
-            className="w-full md:w-20rem ms-6" 
+            value={selectedProducts}
+            onChange={(e) => setSelectedProducts(e.value)}
+            options={products}
+            optionLabel="name"
+            placeholder="Select products"
+            className="w-full md:w-20rem ms-6"
           />
           <TruckIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
         </div>
         <input
           type="hidden"
           name="productIds"
-          value={selectedProducts.map((p) => p.id).join(',')}
+          value={selectedProducts.map((p) => p.id).join(",")}
         />
         <div id="customer-error" aria-live="polite" aria-atomic="true">
-        {
-          state.errors?.customerId &&
+          {/* {state.errors?.customerId &&
             state.errors.customerId.map((error: string) => (
               <p className="mt-2 text-sm text-red-500" key={error}>
                 {error}
               </p>
-          ))
-        }
+            ))} */}
         </div>
       </div>
 
@@ -141,7 +147,6 @@ export default function Form(
                   value="paid"
                   className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
                   aria-describedby="status-error"
-
                 />
                 <label
                   htmlFor="paid"
@@ -151,14 +156,12 @@ export default function Form(
                 </label>
               </div>
               <div id="status-error" aria-live="polite" aria-atomic="true">
-              {
-                state.errors?.status &&
+                {/* {state.errors?.status &&
                   state.errors.status.map((error: string) => (
                     <p className="mt-2 text-sm text-red-500" key={error}>
                       {error}
                     </p>
-                ))
-              }
+                  ))} */}
               </div>
             </div>
           </div>
@@ -171,7 +174,9 @@ export default function Form(
         >
           Cancel
         </Link>
-        <Button type="submit">Create Invoice</Button>
+        <Button type="submit" name="submit">
+          Create Invoice
+        </Button>
       </div>
     </form>
   );

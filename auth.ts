@@ -49,7 +49,6 @@ export const { auth, signIn, signOut } = NextAuth({
 
         const result = await loginUserAction({ ...parsed.data });
 
-        // Si hay errores de validación o null, retornamos null
         if (!result.data || "_errors" in result) return null;
 
         return {
