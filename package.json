@@ -21,6 +21,7 @@
     "multi-select-input": "^1.0.15",
     "next": "15.0.3",
     "next-auth": "5.0.0-beta.29",
+    "next-safe-action": "^8.0.8",
     "postcss": "8.5.1",
     "postgres": "^3.4.6",
     "primeicons": "^7.0.0",
@@ -44,6 +45,7 @@
     "eslint": "^9.31.0",
     "eslint-config-next": "15.4.2",
     "prisma": "^6.12.0",
+    "ts-node": "^10.9.2",
     "tsx": "^4.20.3",
     "typescript": "5.7.3"
   },

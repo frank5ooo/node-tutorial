@@ -8,11 +8,13 @@ import {
   TruckIcon,
 } from '@heroicons/react/24/outline';
 import { Button } from '@/app/ui/button';
-import { createInvoice, State } from '@/app/lib/actions';
+import { State } from '@/app/lib/actions';
 import { useActionState } from 'react';
 import { Customer, Invoice, Product } from '@prisma/client';
 import { MultiSelect } from 'primereact/multiselect';
 import { useState } from 'react';
+import { createInvoice } from '@/app/lib/actions/createInvoice';
+
 
 type SelectOption = {
   id: string;
