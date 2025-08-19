@@ -1,6 +1,6 @@
 import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { deleteInvoice } from '@/app/lib/actions';
+import { deleteInvoice } from '@/app/lib/actions/invoice/deleteInvoice';
 
 export function CreateProduct() {
   return (
@@ -25,15 +25,32 @@ export function UpdateProduct({ id }: { id: string }) {
   );
 }
 
-export function DeleteProduct({ id }: { id: string }) {
-  const deleteInvoiceWithId = deleteInvoice.bind(null, id);
+// export function DeleteInvoice({ id }: { id: string }) {
+//  // const { executeAsync, hasErrored } = useAction(deleteInvoice);
 
-  return (
-    <form action={deleteInvoiceWithId}>
-      <button type="submit" className="rounded-md border p-2 hover:bg-gray-100">
-        <span className="sr-only">Delete</span>
-        <TrashIcon className="w-5" />
-      </button>
-    </form>
-  );
-}
+//   async function handleSubmit(formData: FormData) {
+//     // Validaciones custom del front
+
+//     try {
+//       const invoiceId = formData.get("invoiceId") as string;
+//       const { data, ...errors } = await executeAsync({ invoiceId });
+//       if (errors.validationErrors || errors.serverError) {
+//         throw errors;
+//       }
+//     } catch (errors) {
+//       console.log(errors);
+//     }
+//   }
+
+//   return (
+//     <form action={handleSubmit}>
+//       <input type="hidden" name="invoiceId" value={id} />
+
+//       {hasErrored && "AHHHHHHHHHHH"}
+//       <button type="submit" className="rounded-md border p-2 hover:bg-gray-100">
+//         <span className="sr-only">Delete</span>
+//         <TrashIcon className="w-5" />
+//       </button>
+//     </form>
+//   );
+// }

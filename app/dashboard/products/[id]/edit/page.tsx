@@ -1,33 +1,32 @@
-import Form from '@/app/ui/products/create-form';
-import Breadcrumbs from '@/app/ui/breadcrumbs';
-import { fetchInvoiceById, fetchCustomers } from '@/app/lib/data';
-import { notFound } from 'next/navigation';
+import Form from "@/app/ui/products/edit-form";
+import Breadcrumbs from "@/app/ui/breadcrumbs";
+import { notFound } from "next/navigation";
+import { fetchProductsbyId } from "@/app/lib/data";
 
-export default async function Page(props: { params: Promise<{ id: string }> }) 
-{
-    const params = await props.params;
-    const id = params.id;
-    const [invoice, customers] = await Promise.all([
-        fetchInvoiceById(id),
-        fetchCustomers()
-    ]);
-    if (!invoice) {
-        notFound();
-    }
+export default async function Page(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  const id = params.id;
 
-    return (
-        <main>
-        <Breadcrumbs
-            breadcrumbs={[
-            { label: 'Products', href: '/dashboard/products' },
-            {
-                label: 'Edit Invoice',
-                href: `/dashboard/products/${id}/edit`,
-                active: true,
-            },
-            ]}
-        />
-        <Form/>
-        </main>
-    );
+  const product = await fetchProductsbyId(id);
+  if (!product) {
+    notFound();
+  }
+
+//   console.log(product);
+
+  return (
+    <main>
+      <Breadcrumbs
+        breadcrumbs={[
+          { label: "Products", href: "/dashboard/products" },
+          {
+            label: "Edit Invoice",
+            href: `/dashboard/products/${id}/edit`,
+            active: true,
+          },
+        ]}
+      />
+      <Form products={product ? [product] : []} />
+    </main>
+  );
 }

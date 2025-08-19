@@ -8,11 +8,10 @@ import {
   TruckIcon,
 } from "@heroicons/react/24/outline";
 import { Button } from "@/app/ui/button";
-import { State } from "@/app/lib/actions";
-import { Customer, Invoice, Product } from "@prisma/client";
+import { Customer, Product } from "@prisma/client";
 import { MultiSelect } from "primereact/multiselect";
-import { ReactEventHandler, useActionState, useState } from "react";
-import { createInvoice } from "@/app/lib/actions/createInvoice";
+import { useState } from "react";
+import { createInvoice } from "@/app/lib/actions/invoice/createInvoice";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
 
@@ -34,7 +33,7 @@ export default function Form({
 
   async function handleSubmit(formData: FormData) {
     // Validaciones custom del front
-    console.log(formData.get("customerId"));
+    // console.log(formData.get("customerId"));
     try {
       const { data, ...errors } = await executeAsync(formData);
       if (errors.validationErrors || errors.serverError) {

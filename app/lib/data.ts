@@ -1,12 +1,12 @@
-import { formatCurrency } from './utils';
-import { prisma } from './prisma';
+import { formatCurrency } from "./utils";
+import { prisma } from "./prisma";
 
 export async function fetchRevenue() {
   try {
     // Artificially delay a response for demo purposes.
     // Don't do this in production :)
 
-    console.log('Fetching revenue data...');
+    console.log("Fetching revenue data...");
     await new Promise((resolve) => setTimeout(resolve, 3000));
 
     // const data = await sql<Revenue[]>`SELECT * FROM revenue`;
@@ -15,43 +15,40 @@ export async function fetchRevenue() {
 
     return data;
   } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch revenue data.');
+    console.error("Database Error:", error);
+    throw new Error("Failed to fetch revenue data.");
   }
 }
 
 export async function fetchLatestInvoices() {
   try {
     const data = await prisma.invoice.findMany({
-      orderBy:
-      {
-        date: 'desc',
+      orderBy: {
+        date: "desc",
       },
       take: 5,
-      select:
-      {
+      select: {
         id: true,
-        customer:
-        {
-          select:
-          {
+        customer: {
+          select: {
             name: true,
             email: true,
             image_url: true,
-          }
+          },
         },
-        products:
-        {
-          select:
-          {
+        products: {
+          select: {
             price: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
 
     const latestInvoices = data.map((invoice) => {
-      const total = invoice.products.reduce((sum, product) => sum + product.price, 0);
+      const total = invoice.products.reduce(
+        (sum, product) => sum + product.price,
+        0
+      );
       return {
         ...invoice,
         price: formatCurrency(total),
@@ -59,10 +56,9 @@ export async function fetchLatestInvoices() {
     });
 
     return latestInvoices;
-  }
-  catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch the latest invoices.');
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Failed to fetch the latest invoices.");
   }
 }
 
@@ -87,9 +83,9 @@ export async function fetchCardData() {
 
     for (const invoice of invoices) {
       const total = invoice.products.reduce((acc, p) => acc + p.price, 0);
-      if (invoice.status === 'paid') {
+      if (invoice.status === "paid") {
         paid += total;
-      } else if (invoice.status === 'pending') {
+      } else if (invoice.status === "pending") {
         pending += total;
       }
     }
@@ -100,24 +96,25 @@ export async function fetchCardData() {
       totalPaidInvoices: formatCurrency(paid),
       totalPendingInvoices: formatCurrency(pending),
     };
-  }
-  catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch card data.');
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Failed to fetch card data.");
   }
 }
 
 const ITEMS_PER_PAGE = 6;
 
-export async function fetchFilteredInvoices(query: string, currentPage: number) 
-{
+export async function fetchFilteredInvoices(
+  query: string,
+  currentPage: number
+) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
   const maybePrice = Number(query) * 100;
   const isNumber = !isNaN(maybePrice);
 
   try {
     const invoices = await prisma.invoice.findMany({
-      orderBy: { date: 'desc' },
+      orderBy: { date: "desc" },
       take: ITEMS_PER_PAGE,
       skip: offset,
       select: {
@@ -128,46 +125,47 @@ export async function fetchFilteredInvoices(query: string, currentPage: number)
         products: {
           select: {
             price: true,
-          }
-        }
+          },
+        },
       },
-      where:
-      {
-        OR:
-          [
-            { customer: { name: { contains: query, mode: 'insensitive' } } },
-            { customer: { email: { contains: query, mode: 'insensitive' } } },
-            { status: { contains: query, mode: 'insensitive' } },
-            ...(isNumber
-              ? [{
-                products: {
-                  some: {
-                    price: {
-                      equals: maybePrice
-                    }
-                  }
-                }
-              }]
-              : [])
-          ],
+      where: {
+        OR: [
+          { customer: { name: { contains: query, mode: "insensitive" } } },
+          { customer: { email: { contains: query, mode: "insensitive" } } },
+          { status: { contains: query, mode: "insensitive" } },
+          ...(isNumber
+            ? [
+                {
+                  products: {
+                    some: {
+                      price: {
+                        equals: maybePrice,
+                      },
+                    },
+                  },
+                },
+              ]
+            : []),
+        ],
       },
     });
 
-    return invoices.map(({products, ...invoice}) => {
+    return invoices.map(({ products, ...invoice }) => {
       const price = products.reduce((sum, prod) => sum + prod.price, 0);
       return {
         ...invoice,
         price,
       };
     });
-  }
-
-  catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch invoices.');
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Failed to fetch invoices.");
   }
 }
-export async function fetchFilteredProducts(query: string, currentPage: number) {
+export async function fetchFilteredProducts(
+  query: string,
+  currentPage: number
+) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
   const maybePrice = Number(query) * 100;
   const isNumber = !isNaN(maybePrice);
@@ -176,49 +174,43 @@ export async function fetchFilteredProducts(query: string, currentPage: number) 
     const products = await prisma.product.findMany({
       take: ITEMS_PER_PAGE,
       skip: offset,
-      where:
-      {
-        OR:
-          [
-            { name: { contains: query, mode: 'insensitive' } },
-            ...(isNumber
-              ? [
+      where: {
+        OR: [
+          { name: { contains: query, mode: "insensitive" } },
+          ...(isNumber
+            ? [
                 {
                   price: {
-                    equals: maybePrice
-                  }
-                }
+                    equals: maybePrice,
+                  },
+                },
               ]
-              : [])
-          ],
+            : []),
+        ],
       },
-
     });
 
     // console.debug(query);
     return products;
-  }
-  catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch products.');
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Failed to fetch products.");
   }
 }
 
 export async function fetchProductPages(query: string) {
   try {
     const data = await prisma.product.count({
-      where:
-      {
-        name: { contains: query, mode: 'insensitive' },
-      }
+      where: {
+        name: { contains: query, mode: "insensitive" },
+      },
     });
 
     const totalPages = Math.ceil(Number(data) / ITEMS_PER_PAGE);
     return totalPages;
-  }
-  catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch total number of invoices.');
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Failed to fetch total number of invoices.");
   }
 }
 
@@ -226,20 +218,15 @@ export async function fetchInvoicesPages(query: string) {
   try {
     const data = await prisma.invoice.count({
       where: {
-        OR:
-          [
-            { customer: { name: { contains: query, mode: 'insensitive' } } },
-          ],
-      }
-
+        OR: [{ customer: { name: { contains: query, mode: "insensitive" } } }],
+      },
     });
 
     const totalPages = Math.ceil(Number(data) / ITEMS_PER_PAGE);
     return totalPages;
-  }
-  catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch total number of invoices.');
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Failed to fetch total number of invoices.");
   }
 }
 
@@ -259,85 +246,71 @@ export async function fetchInvoiceById(id: string) {
     if (!data) return null;
 
     return data;
-  }
-  catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch invoice.');
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Failed to fetch invoice.");
   }
 }
 
 export async function fetchCustomers() {
   try {
     const customers = await prisma.customer.findMany({
-      select:
-      {
+      select: {
         id: true,
         name: true,
       },
       orderBy: {
         name: "asc",
-      }
-
+      },
     });
 
     return customers;
   } catch (err) {
-    console.error('Database Error:', err);
-    throw new Error('Failed to fetch all customers.');
+    console.error("Database Error:", err);
+    throw new Error("Failed to fetch all customers.");
   }
 }
 
-export async function fetchProducts() {
+export async function fetchProducts(id: string) {
   try {
     const product = await prisma.product.findMany({
-      where:
-      {
+      where: {
         invoice_id: null,
       },
-      select:
-      {
+      select: {
         id: true,
         name: true,
         invoice_id: true,
       },
       orderBy: {
         name: "asc",
-      }
+      },
     });
 
     return product;
-  }
-  catch (err) {
-    console.error('Database Error:', err);
-    throw new Error('Failed to fetch all product.');
+  } catch (err) {
+    console.error("Database Error:", err);
+    throw new Error("Failed to fetch all product.");
   }
 }
 
 export async function fetchProductsbyId(id: string) {
   try {
-    const data = await prisma.product.findMany({
-      where:
-      {
-        OR: [
-          { invoice_id: null },
-          { invoice_id: id },
-        ]
+    const data = await prisma.product.findUnique({
+      where: {
+        id,
       },
-      select:
-      {
+      select: {
         id: true,
         name: true,
-        invoice_id: true,
+        // invoice_id: true,
+        price: true,
       },
-      orderBy: {
-        name: "asc",
-      }
     });
 
-    return data
-  }
-  catch (err) {
-    console.error('Database Error:', err);
-    throw new Error('Failed to fetch all product.');
+    return data;
+  } catch (err) {
+    console.error("Database Error:", err);
+    throw new Error("Failed to fetch all product.");
   }
 }

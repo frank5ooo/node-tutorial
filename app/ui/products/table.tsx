@@ -1,4 +1,4 @@
-import { UpdateProduct, DeleteProduct } from '@/app/ui/products/buttons';
+import { UpdateProduct, /*DeleteProduct*/ } from '@/app/ui/products/buttons';
 import ProductStatus from '@/app/ui/products/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
 import { fetchFilteredProducts } from '@/app/lib/data';
@@ -39,8 +39,8 @@ export default async function ProductsTable({
                     </p>
                   </div>
                   <div className="flex justify-end gap-2">
-                    <UpdateProduct id={product.id} />
-                    <DeleteProduct id={product.id} />
+                      <UpdateProduct id={product.id} />
+                    {/* <DeleteProduct id={product.id} /> */}
                   </div>
                 </div>
               </div>
@@ -84,7 +84,7 @@ export default async function ProductsTable({
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex justify-end gap-3">
                       <UpdateProduct id={product.id} />
-                      <DeleteProduct id={product.id} />
+                      {/* <DeleteProduct id={product.id} /> */}
                     </div>
                   </td>
                 </tr>
