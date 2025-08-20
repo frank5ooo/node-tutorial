@@ -1,37 +1,39 @@
 "use client";
 
-import { ProductsField } from "@/app/lib/definitions";
 import {
-  CheckIcon,
-  ClockIcon,
   CurrencyDollarIcon,
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { Button } from "@/app/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { updateProduct } from "@/app/lib/actions/product/updateProduct";
 import { Product } from "@prisma/client";
+import { MakePartial } from "@/app/lib/utils";
+import { NumberInput } from "../number-input";
+
+type ProductData = Pick<Product, "id" | "name" | "price">;
 
 export default function EditInvoiceForm({
   products,
 }: {
-  products: Pick<Product, "id" | "name" | "price">[];
+  products: ProductData[];
 }) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<MakePartial<ProductData, "price">>({
     id: products[0].id,
     name: products[0].name,
-    price: products[0].price/100,
+    price: products[0].price,
   });
 
-  console.log(formData);
+  console.log("formData.price", formData.price);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const dataToSend = {
       id: formData.id,
       name: formData.name,
-      price: Math.round(Number(formData.price) * 100), // convertir a centavos solo al enviar
+      price: Number(formData.price),
     };
 
     try {
@@ -40,7 +42,7 @@ export default function EditInvoiceForm({
       if (result?.serverError) {
         console.error(result?.serverError);
       } else {
-        console.debug("Producto Creado");
+        console.debug("Producto Actualizado");
       }
     } catch (error) {
       console.log(error);
@@ -73,29 +75,24 @@ export default function EditInvoiceForm({
               }
               required
             />
-            <label
-              htmlFor="pending"
-              className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600"
-            ></label>
           </div>
           <label htmlFor="price" className="mb-2 block text-sm font-medium">
             Choose an amount
           </label>
           <div className="relative mt-2 rounded-md">
             <div className="relative">
-              <input
+              <NumberInput
                 id="price"
                 name="price"
                 type="text"
-                step="0.01"
                 placeholder="Enter USD price"
                 className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
                 aria-describedby="price-error"
-                value={formData.price}
-                onChange={(e) =>
+                initialValue={formData.price && formData.price / 100}
+                onChange={(newPrice) =>
                   setFormData((prev) => ({
                     ...prev,
-                    price: Number(e.target.value),
+                    price: newPrice && newPrice * 100,
                   }))
                 }
                 required

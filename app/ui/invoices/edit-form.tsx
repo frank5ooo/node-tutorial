@@ -9,7 +9,7 @@ import {
 import Link from "next/link";
 import { Button } from "@/app/ui/button";
 import { updateInvoice } from "@/app/lib/actions/invoice/updateInvoice";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { MultiSelect } from "primereact/multiselect";
 import { useState } from "react";
 import { Customer, Invoice, Product } from "@prisma/client";
@@ -33,6 +33,8 @@ export default function EditInvoiceForm({
   customers: Pick<Customer, "id" | "name">[];
   products: Pick<Product, "id" | "name">[];
 }) {
+
+  const availableProducts = useMemo(() => [...invoice.products, ...products], [invoice.products, products])
   const { executeAsync, hasErrored } = useAction(updateInvoice);
   const router = useRouter();
 
@@ -51,11 +53,11 @@ export default function EditInvoiceForm({
   const [selectedProducts, setSelectedProducts] = useState<SelectOption[]>([]);
 
   useEffect(() => {
-    const selected = products.filter((product) =>
+    const selected = availableProducts.filter((product) =>
       invoice.products.some((p) => p.id === product.id)
     );
     setSelectedProducts(selected);
-  }, [invoice.products, products]);
+  }, [invoice.products, availableProducts]);
 
   return (
     <form action={handleSubmit}>
@@ -99,7 +101,7 @@ export default function EditInvoiceForm({
           <MultiSelect
             value={selectedProducts}
             onChange={(e) => setSelectedProducts(e.value)}
-            options={products}
+            options={availableProducts}
             optionLabel="name"
             placeholder="Select products"
             className="w-full md:w-20rem ms-6"

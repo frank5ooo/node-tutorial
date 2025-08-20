@@ -6,7 +6,7 @@ import z from "zod";
 import { revalidatePath } from "next/cache";
 
 const FormSchema = z.object({
-  invoiceId: z.string(),
+  id: z.string(),
 });
 
 export const deleteInvoice = actionClient
@@ -14,7 +14,7 @@ export const deleteInvoice = actionClient
   .action(async ({ parsedInput }) => {
     await prisma.invoice.delete({
       where: {
-        id: parsedInput.invoiceId,
+        id: parsedInput.id,
       },
     });
     revalidatePath("/dashboard/invoices");

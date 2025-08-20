@@ -3,29 +3,35 @@
 import { useAction } from "next-safe-action/hooks";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { deleteInvoice } from "@/app/lib/actions/invoice/deleteInvoice";
+import { useState } from "react";
+
 
 export function DeleteInvoice({ id }: { id: string }) {
-  const { executeAsync, hasErrored } = useAction(deleteInvoice);
 
-  async function handleSubmit(formData: FormData) {
-    // Validaciones custom del front
-
-    try {
-      const invoiceId = formData.get("invoiceId") as string;
-      const { data, ...errors } = await executeAsync({ invoiceId });
-      if (errors.validationErrors || errors.serverError) {
-        throw errors;
-      }
-    } catch (errors) {
-      console.log(errors);
-    }
-  }
-
+ const handleSubmit = async (e: React.FormEvent) => {
+     e.preventDefault();
+ 
+     const dataToSend = {
+       id,
+     };
+ 
+     try {
+       const result = await deleteInvoice(dataToSend);
+ 
+       if (result?.serverError) {
+         console.error(result?.serverError);
+       } else {
+         console.debug("Producto Creado");
+       }
+     } catch (error) {
+       console.log(error);
+     }
+   };
+ 
   return (
-    <form action={handleSubmit}>
-      <input type="hidden" name="invoiceId" value={id} />
+    <form onSubmit={handleSubmit}>
+      {/* <input type="hidden" name="invoiceId" value={id} /> */}
 
-      {hasErrored && "AHHHHHHHHHHH"}
       <button type="submit" className="rounded-md border p-2 hover:bg-gray-100">
         <span className="sr-only">Delete</span>
         <TrashIcon className="w-5" />

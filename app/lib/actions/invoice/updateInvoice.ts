@@ -18,7 +18,7 @@ export const updateInvoice = actionClient
     const productRaw = parsedInput.productIds.toString();
     const selectedIds = productRaw ? productRaw.split(",").filter(Boolean) : [];
 
-    // console.log("selectedIds", selectedIds);
+    console.log("selectedIds", selectedIds);
 
     const currentProducts = await prisma.product.findMany({
       where: {

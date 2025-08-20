@@ -5,6 +5,7 @@ import { CurrencyDollarIcon, TruckIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/app/ui/button";
 import { useState } from "react";
 import { createProduct } from "@/app/lib/actions/product/createProduct";
+import { useAction } from "next-safe-action/hooks";
 
 type ProductForm = {
   product: {
@@ -19,6 +20,8 @@ export default function Form({ product }: ProductForm) {
     price: product?.price || "",
   });
 
+  const {executeAsync, status} = useAction(createProduct);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const dataToSend = {
@@ -27,10 +30,12 @@ export default function Form({ product }: ProductForm) {
     };
 
     try {
-      const result = await createProduct(dataToSend);
+      const result = await executeAsync(dataToSend);
 
-      if (result?.serverError) {
-        console.error(result?.serverError);
+      if (result?.validationErrors) {
+        // 
+      } else if(result?.serverError) {
+        console.error(result.serverError);
       } else {
         console.debug("Producto Creado");
       }

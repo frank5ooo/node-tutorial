@@ -32,8 +32,6 @@ export default function Form({
   const router = useRouter();
 
   async function handleSubmit(formData: FormData) {
-    // Validaciones custom del front
-    // console.log(formData.get("customerId"));
     try {
       const { data, ...errors } = await executeAsync(formData);
       if (errors.validationErrors || errors.serverError) {
