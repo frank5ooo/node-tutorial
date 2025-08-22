@@ -1,7 +1,7 @@
 import { UpdateProduct } from "@/app/ui/products/buttons/buttons";
 import ProductStatus from "@/app/ui/products/status";
 import { formatCurrency } from "@/app/lib/utils";
-import { fetchFilteredProducts } from "@/app/lib/data";
+import { fetchFilteredProducts } from "@/app/lib/data/filter/fetch-filtered-products";
 import { DeleteProduct } from "./buttons/deleteButtons";
 export default async function ProductsTable({
   query,
@@ -10,14 +10,14 @@ export default async function ProductsTable({
   query: string;
   currentPage: number;
 }) {
-  const products = await fetchFilteredProducts(query, currentPage);
+  const products = await fetchFilteredProducts({query, currentPage});
 
   return (
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
         <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
           <div className="md:hidden">
-            {products?.map((product) => (
+            {products.data?.map((product) => (
               <div
                 key={product.id}
                 className="mb-2 w-full rounded-md bg-white p-4"
@@ -65,7 +65,7 @@ export default async function ProductsTable({
               </tr>
             </thead>
             <tbody className="bg-white">
-              {products?.map((product) => (
+              {products.data?.map((product) => (
                 <tr
                   key={product.id}
                   className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"

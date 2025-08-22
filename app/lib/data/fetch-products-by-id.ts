@@ -8,15 +8,16 @@ const FormSchema = z.object({
   id: z.string(),
 });
 
-export const fetchProducts = actionClient
+export const fetchProductsById = actionClient
   .inputSchema(FormSchema)
   .action(async ({ parsedInput }) => {
     try {
-      const product = await prisma.product.findMany({
+      const product = await prisma.product.findUnique({
         where: {
-          invoice_id: parsedInput.id,
+          id: parsedInput.id,
         },
         select: {
+          id: true,
           name: true,
           price: true,
         },

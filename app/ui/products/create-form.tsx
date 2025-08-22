@@ -22,7 +22,7 @@ export default function Form({ product }: ProductForm) {
   });
   const router = useRouter();
 
-  const { executeAsync, status } = useAction(createProduct);
+  const { executeAsync } = useAction(createProduct);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,14 +35,14 @@ export default function Form({ product }: ProductForm) {
       const result = await executeAsync(dataToSend);
 
       if (result?.validationErrors) {
-        //
+        console.error(result.validationErrors);
       } else if (result?.serverError) {
         console.error(result.serverError);
       } else {
         console.debug("Producto Creado");
       }
 
-      router.push("/dashboard/products"); // redirección desde el cliente
+      router.push("/dashboard/products");
     } catch (error) {
       console.log(error);
     }
@@ -50,7 +50,7 @@ export default function Form({ product }: ProductForm) {
 
   return (
     <form onSubmit={handleSubmit}>
-      {/* Customer Name */}
+      {/* Product Name */}
       <div className="mb-4">
         <label htmlFor="name" className="mb-2 block text-sm font-medium">
           Choose product
@@ -77,7 +77,7 @@ export default function Form({ product }: ProductForm) {
         </div>
       </div>
 
-      {/* Invoice price */}
+      {/* Product price */}
       <div className="mb-4">
         <label htmlFor="price" className="mb-2 block text-sm font-medium">
           Choose an amount

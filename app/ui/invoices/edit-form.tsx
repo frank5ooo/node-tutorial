@@ -33,10 +33,14 @@ export default function EditInvoiceForm({
   customers: Pick<Customer, "id" | "name">[];
   products: Pick<Product, "id" | "name">[];
 }) {
-
-  const availableProducts = useMemo(() => [...invoice.products, ...products], [invoice.products, products])
+  const availableProducts = useMemo(
+    () => [...invoice.products, ...products],
+    [invoice.products, products]
+  );
   const { executeAsync, hasErrored } = useAction(updateInvoice);
   const router = useRouter();
+
+  // console.log("invoice.products", invoice.products);
 
   async function handleSubmit(formData: FormData) {
     try {
