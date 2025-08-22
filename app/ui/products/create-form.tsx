@@ -6,6 +6,7 @@ import { Button } from "@/app/ui/button";
 import { useState } from "react";
 import { createProduct } from "@/app/lib/actions/product/createProduct";
 import { useAction } from "next-safe-action/hooks";
+import { useRouter } from "next/navigation";
 
 type ProductForm = {
   product: {
@@ -19,8 +20,9 @@ export default function Form({ product }: ProductForm) {
     name: product?.name || "",
     price: product?.price || "",
   });
+  const router = useRouter();
 
-  const {executeAsync, status} = useAction(createProduct);
+  const { executeAsync, status } = useAction(createProduct);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,12 +35,14 @@ export default function Form({ product }: ProductForm) {
       const result = await executeAsync(dataToSend);
 
       if (result?.validationErrors) {
-        // 
-      } else if(result?.serverError) {
+        //
+      } else if (result?.serverError) {
         console.error(result.serverError);
       } else {
         console.debug("Producto Creado");
       }
+
+      router.push("/dashboard/products"); // redirección desde el cliente
     } catch (error) {
       console.log(error);
     }

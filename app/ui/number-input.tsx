@@ -25,25 +25,21 @@ export function NumberInput({ initialValue, onChange, ...props }: Props) {
   }, [value]);
 
   function handleChage({ target }: ChangeEvent<HTMLInputElement>) {
-    let value = target.value;
+    let value = target.value.replace(/[^0-9,\.]/g, "");
 
-    // Filtrar: solo números y coma
-    value = value.replace(/[^0-9,]/g, "");
-
-    // Si hay más de una coma, quedate solo con la primera
     const parts = value.split(".");
     if (parts.length > 2) {
       value = parts[0] + "." + parts.slice(1).join("").replace(/,/g, "");
     }
 
-    // Convertir a número real (reemplazo de coma a punto)
-    const total = parseFloat(value.replace(",", "."));
+    const total = (value.replace(",", "."));
+    value = total.toString();
 
+    console.log("total", total);
     console.log("value", value);
 
     setValue(value);
-    
-    console.log("Value",(value.replace(",", ".")));
+
   }
   return <input {...props} value={value} onChange={handleChage} />;
 }

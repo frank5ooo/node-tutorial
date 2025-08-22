@@ -21,63 +21,6 @@ export type StateProduct = {
   message?: string | null;
 };
 
-const FormSchemaProduct = z.object({
-  id: z.string(),
-  name: z.string(),
-  price: z.coerce
-    .number()
-    .gt(0, { message: "Please enter an amount greater than $0." }),
-});
-
-const UpdateProduct = FormSchemaProduct.omit({ id: true });
-
-export async function updateProduct(
-  id: string,
-  prevState: State,
-  formData: FormData
-) {
-  const validatedFields = UpdateProduct.safeParse({
-    price: formData.get("price"),
-    name: formData.get("name"),
-  });
-
-  if (!validatedFields.success) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-      message: "Missing Fields. Failed to Update Invoice.",
-    };
-  }
-
-  const { price, name } = validatedFields.data;
-
-  try {
-    await prisma.product.update({
-      where: {
-        id,
-      },
-      data: {
-        price,
-        name,
-      },
-    });
-  } catch (error) {
-    return { message: "Database Error: Failed to Update Invoice." };
-  }
-
-  revalidatePath("/dashboard/products");
-  redirect("/dashboard/products");
-}
-
-export async function deleteProduct(id: string) {
-  await prisma.product.delete({
-    where: {
-      id,
-    },
-  });
-
-  revalidatePath("/dashboard/products");
-}
-
 export async function fetchProducts(id: string) {
   try {
     const product = await prisma.product.findMany({
@@ -90,9 +33,9 @@ export async function fetchProducts(id: string) {
       },
     });
 
-    console.log("id fetcg", id);
+    // console.log("id fetch", id);
 
-    console.log("fetchproduct", product);
+    // console.log("fetchproduct", product);
     return product;
   } catch (err) {
     console.error("Database Error:", err);

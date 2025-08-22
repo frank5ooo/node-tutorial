@@ -21,7 +21,6 @@ model Customer {
 model Invoice {
   id          String    @id @default(uuid())
   customer_id String    
-  // amount      Int
   status      String    @db.VarChar(255)
   date        DateTime  @db.Date
   products    Product[] 

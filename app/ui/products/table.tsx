@@ -1,16 +1,15 @@
-import { UpdateProduct, /*DeleteProduct*/ } from '@/app/ui/products/buttons';
-import ProductStatus from '@/app/ui/products/status';
-import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
-import { fetchFilteredProducts } from '@/app/lib/data';
-
+import { UpdateProduct } from "@/app/ui/products/buttons/buttons";
+import ProductStatus from "@/app/ui/products/status";
+import { formatCurrency } from "@/app/lib/utils";
+import { fetchFilteredProducts } from "@/app/lib/data";
+import { DeleteProduct } from "./buttons/deleteButtons";
 export default async function ProductsTable({
   query,
   currentPage,
 }: {
   query: string;
   currentPage: number;
-}) 
-{
+}) {
   const products = await fetchFilteredProducts(query, currentPage);
 
   return (
@@ -26,7 +25,6 @@ export default async function ProductsTable({
                 <div className="flex items-center justify-between border-b pb-4">
                   <div>
                     <div className="mb-2 flex items-center">
-                      
                       <p>{product.name}</p>
                     </div>
                   </div>
@@ -39,8 +37,11 @@ export default async function ProductsTable({
                     </p>
                   </div>
                   <div className="flex justify-end gap-2">
-                      <UpdateProduct id={product.id} />
-                    {/* <DeleteProduct id={product.id} /> */}
+                    <UpdateProduct id={product.id} />
+                    <DeleteProduct
+                      id={product.id}
+                      invoice_id={product.invoice_id}
+                    />
                   </div>
                 </div>
               </div>
@@ -71,7 +72,6 @@ export default async function ProductsTable({
                 >
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex items-center gap-3">
-                      
                       <p>{product.name}</p>
                     </div>
                   </td>
@@ -84,7 +84,10 @@ export default async function ProductsTable({
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex justify-end gap-3">
                       <UpdateProduct id={product.id} />
-                      {/* <DeleteProduct id={product.id} /> */}
+                      <DeleteProduct
+                        id={product.id}
+                        invoice_id={product.invoice_id}
+                      />
                     </div>
                   </td>
                 </tr>

@@ -33,7 +33,7 @@ export default function EditInvoiceForm({
     const dataToSend = {
       id: formData.id,
       name: formData.name,
-      price: Number(formData.price),
+      price: formData.price as number,
     };
 
     try {
