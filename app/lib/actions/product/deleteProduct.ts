@@ -6,7 +6,7 @@ import z from "zod";
 import { revalidatePath } from "next/cache";
 
 const FormSchema = z.object({
-  id: z.string(),
+  id: z.string().uuid(),
 });
 
 export const deleteProduct = actionClient

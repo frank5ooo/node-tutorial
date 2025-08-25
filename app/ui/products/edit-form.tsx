@@ -6,11 +6,12 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { Button } from "@/app/ui/button";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { updateProduct } from "@/app/lib/actions/product/updateProduct";
 import { Product } from "@prisma/client";
 import { MakePartial } from "@/app/lib/utils";
 import { NumberInput } from "../number-input";
+import { useRouter } from "next/navigation";
 
 type ProductData = Pick<Product, "id" | "name" | "price">;
 
@@ -24,6 +25,7 @@ export default function EditInvoiceForm({
     name: products[0].name,
     price: products[0].price,
   });
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +42,7 @@ export default function EditInvoiceForm({
       if (result?.serverError) {
         console.error(result?.serverError);
       } else {
-        console.debug("Producto Actualizado");
+        router.push("/dashboard/products");
       }
     } catch (error) {
       console.error(error);

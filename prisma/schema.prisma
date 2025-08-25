@@ -51,7 +51,7 @@ model Product {
   id          String @id @default(uuid())
   /// Datos del producto
   name        String
-  price       Float
+  price       BigInt
   invoice_id  String?
   // relación a Invoice
   invoice     Invoice?  @relation(fields: [invoice_id], references: [id])

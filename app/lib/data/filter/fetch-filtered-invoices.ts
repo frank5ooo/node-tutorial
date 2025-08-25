@@ -18,7 +18,6 @@ export const fetchFilteredInvoices = actionClient
 
     try {
       const invoices = await prisma.invoice.findMany({
-        orderBy: { date: "desc" },
         take: ITEMS_PER_PAGE,
         skip: offset,
         select: {
@@ -34,8 +33,16 @@ export const fetchFilteredInvoices = actionClient
         },
         where: {
           OR: [
-            { customer: { name: { contains: parsedInput.query, mode: "insensitive" } } },
-            { customer: { email: { contains: parsedInput.query, mode: "insensitive" } } },
+            {
+              customer: {
+                name: { contains: parsedInput.query, mode: "insensitive" },
+              },
+            },
+            {
+              customer: {
+                email: { contains: parsedInput.query, mode: "insensitive" },
+              },
+            },
             { status: { contains: parsedInput.query, mode: "insensitive" } },
             ...(isNumber
               ? [
@@ -52,6 +59,7 @@ export const fetchFilteredInvoices = actionClient
               : []),
           ],
         },
+        orderBy: { date: "desc" },
       });
 
       return invoices.map(({ products, ...invoice }) => {
@@ -66,3 +74,5 @@ export const fetchFilteredInvoices = actionClient
       throw new Error("Failed to fetch invoices.");
     }
   });
+
+  

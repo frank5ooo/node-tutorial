@@ -40,7 +40,7 @@ export default function Form({
         router.push("/dashboard/invoices");
       }
     } catch (errors) {
-      console.error(errors);
+      console.log(errors);
     }
   }
 

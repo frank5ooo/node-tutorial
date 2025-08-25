@@ -34,6 +34,9 @@ export const fetchFilteredProducts = actionClient
               : []),
           ],
         },
+        orderBy:{
+          invoice_id:"desc",
+        }
       });
 
       // console.debug(query);

@@ -14,13 +14,9 @@ export const fetchInvoicesPages = actionClient
     try {
       const data = await prisma.invoice.count({
         where: {
-          OR: [
-            {
-              customer: {
-                name: { contains: parsedInput.query, mode: "insensitive" },
-              },
-            },
-          ],
+          customer: {
+            name: { contains: parsedInput.query, mode: "insensitive" },
+          },
         },
       });
 

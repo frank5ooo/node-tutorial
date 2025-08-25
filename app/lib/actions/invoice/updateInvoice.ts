@@ -9,14 +9,13 @@ const FormSchema = zfd.formData({
   invoiceId: zfd.text(),
   customerId: zfd.text(),
   status: zfd.text().transform((val) => z.enum(["pending", "paid"]).parse(val)),
-  productIds: zfd.text().transform((val) => val.split(",")),
+  productIds: zfd.text().transform((val) => val.split(",").filter(Boolean)),
 });
 
 export const updateInvoice = actionClient
   .inputSchema(FormSchema)
   .action(async ({ parsedInput }) => {
-    const productRaw = parsedInput.productIds.toString();
-    const selectedIds = productRaw ? productRaw.split(",").filter(Boolean) : [];
+    const selectedIds = parsedInput.productIds;
 
     // console.log("selectedIds", selectedIds);
 
@@ -46,6 +45,19 @@ export const updateInvoice = actionClient
     // console.log("toRemove", toRemove);
 
     try {
+      /*
+      prisma.invoice.update({
+        where: { id: parsedInput.invoiceId },
+        data: {
+          customer_id: parsedInput.customerId,
+          status: parsedInput.status,
+          products: {
+            connect: toAdd.map((id) => ({ id })),
+            disconnect: toRemove.map((id) => ({ id })),
+          },
+        },
+      });
+      /*/
       await prisma.$transaction([
         ...toAdd.map((productId) =>
           prisma.product.update({
@@ -67,6 +79,7 @@ export const updateInvoice = actionClient
           },
         }),
       ]);
+      //*/
     } catch (error) {
       return { message: "Database Error: Failed to Update Invoice." };
     }

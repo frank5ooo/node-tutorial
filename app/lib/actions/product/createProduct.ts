@@ -14,7 +14,7 @@ const FormSchemaProduct = z.object({
 export const createProduct = actionClient
   .inputSchema(FormSchemaProduct)
   .action(async ({ parsedInput }) => {
-    const priceInCents = parsedInput.price * 100;
+    const priceInCents = Math.round(parsedInput.price * 100);
 
     try {
       await prisma.product.create({

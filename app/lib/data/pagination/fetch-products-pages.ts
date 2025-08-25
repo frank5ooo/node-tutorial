@@ -16,6 +16,9 @@ export const fetchProductPages = actionClient
         where: {
           name: { contains: parsedInput.query, mode: "insensitive" },
         },
+        orderBy:{
+          price:"asc",
+        }
       });
 
       const totalPages = Math.ceil(Number(data) / ITEMS_PER_PAGE);

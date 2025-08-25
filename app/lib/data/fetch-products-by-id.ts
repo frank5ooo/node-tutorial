@@ -5,7 +5,7 @@ import { actionClient } from "@/app/lib/safe-action";
 import { z } from "zod";
 
 const FormSchema = z.object({
-  id: z.string(),
+  id: z.string().uuid(),
 });
 
 export const fetchProductsById = actionClient

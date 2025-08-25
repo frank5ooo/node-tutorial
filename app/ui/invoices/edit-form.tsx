@@ -12,7 +12,7 @@ import { updateInvoice } from "@/app/lib/actions/invoice/updateInvoice";
 import { useEffect, useMemo } from "react";
 import { MultiSelect } from "primereact/multiselect";
 import { useState } from "react";
-import { Customer, Invoice, Product } from "@prisma/client";
+import { Customer, Prisma, Product } from "@prisma/client";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
 
@@ -20,9 +20,10 @@ type SelectOption = {
   id: string;
   name: string;
 };
-type InvoiceWithProducts = Invoice & {
-  products: Product[];
-};
+
+type InvoiceWithProducts = Prisma.InvoiceGetPayload<{
+  include: { products: true };
+}>;
 
 export default function EditInvoiceForm({
   invoice,
@@ -37,7 +38,7 @@ export default function EditInvoiceForm({
     () => [...invoice.products, ...products],
     [invoice.products, products]
   );
-  const { executeAsync, hasErrored } = useAction(updateInvoice);
+  const { executeAsync } = useAction(updateInvoice);
   const router = useRouter();
 
   // console.log("invoice.products", invoice.products);
@@ -47,9 +48,8 @@ export default function EditInvoiceForm({
       const { data, ...errors } = await executeAsync(formData);
       if (errors.validationErrors || errors.serverError) {
         throw errors;
-      } else {
-        router.push("/dashboard/invoices");
       }
+      router.push("/dashboard/invoices");
     } catch (errors) {
       // console.log("errors", errors);
       console.error(errors);
@@ -66,8 +66,6 @@ export default function EditInvoiceForm({
 
   return (
     <form action={handleSubmit}>
-      {hasErrored && "AHHHHHHHHHHH"}
-
       <input type="hidden" name="invoiceId" value={invoice.id} />
 
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
