@@ -20,7 +20,7 @@ export function DeleteInvoice({ id }: { id: string }) {
         console.debug("Producto Creado");
       }
     } catch (error) {
-      console.log(error);
+        console.error(error);
     }
   };
 

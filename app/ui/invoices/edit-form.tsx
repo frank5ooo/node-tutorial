@@ -51,7 +51,8 @@ export default function EditInvoiceForm({
         router.push("/dashboard/invoices");
       }
     } catch (errors) {
-      console.log("errors", errors);
+      // console.log("errors", errors);
+      console.error(errors);
     }
   }
   const [selectedProducts, setSelectedProducts] = useState<SelectOption[]>([]);

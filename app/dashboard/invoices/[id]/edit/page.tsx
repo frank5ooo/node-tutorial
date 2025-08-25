@@ -18,8 +18,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     notFound();
   }
 
-    console.log("invoice",invoice);
-
   return (
     <main>
       <Breadcrumbs

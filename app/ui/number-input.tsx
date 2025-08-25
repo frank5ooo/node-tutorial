@@ -35,9 +35,6 @@ export function NumberInput({ initialValue, onChange, ...props }: Props) {
     const total = (value.replace(",", "."));
     value = total.toString();
 
-    console.log("total", total);
-    console.log("value", value);
-
     setValue(value);
 
   }

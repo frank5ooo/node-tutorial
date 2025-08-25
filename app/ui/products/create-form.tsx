@@ -44,7 +44,7 @@ export default function Form({ product }: ProductForm) {
 
       router.push("/dashboard/products");
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 

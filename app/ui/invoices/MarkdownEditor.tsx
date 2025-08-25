@@ -1,46 +1,56 @@
-'use client'
+"use client";
 
-import { useState, Suspense} from 'react';
-import Loading from './loading';
-import { fetchProducts } from '@/app/lib/actions';
-import { LinkIcon } from '@heroicons/react/24/outline';
-import 'react-tooltip/dist/react-tooltip.css'
-import * as React from 'react';
-import { styled } from '@mui/material/styles';
-import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
-import ClickAwayListener from '@mui/material/ClickAwayListener';
+import { useState, Suspense } from "react";
+import Loading from "./loading";
+import { fetchProductsByInvoiceId } from "@/app/lib/data/fetch-products-by-invoiceId";
+import { LinkIcon } from "@heroicons/react/24/outline";
+import "react-tooltip/dist/react-tooltip.css";
+import * as React from "react";
+import { styled } from "@mui/material/styles";
+import Tooltip, { TooltipProps, tooltipClasses } from "@mui/material/Tooltip";
+import ClickAwayListener from "@mui/material/ClickAwayListener";
+import MarkdownPreview from "./clickModal";
 
 const LightTooltip = styled(({ className, ...props }: TooltipProps) => (
   <Tooltip {...props} classes={{ popper: className }} />
 ))(({ theme }) => ({
   [`& .${tooltipClasses.tooltip}`]: {
     backgroundColor: theme.palette.common.white,
-    color: 'rgba(0, 0, 0, 0.87)',
+    color: "rgba(0, 0, 0, 0.87)",
     boxShadow: theme.shadows[1],
     fontSize: 15,
     maxWidth: 300, // limita ancho para que no sea muy ancho
   },
 }));
 
+type ProductData = { name: string; price: number };
 
-import MarkdownPreview from './clickModal';
-
-
-export default function MarkdownEditor({ id }: { id: string }) 
-{
+export default function MarkdownEditor({ id }: { id: string }) {
   const [open, setOpen] = React.useState(false);
-  const [fetchDatos, setFetchDatos] = useState<ReturnType<typeof fetchProducts>>();
-  
+  const [fetchDatos, setFetchDatos] = React.useState<ProductData[] | null>(
+    null
+  );
+
   const handleTooltipClose = () => {
     setOpen(false);
   };
-  
+
   const handleTooltipOpen = () => {
     setOpen(true);
 
-    if(!fetchDatos) setFetchDatos(fetchProducts(id));
+    if (!fetchDatos) {
+      fetchProductsByInvoiceId({ id }).then((res) => {
+        if (res.data) {
+          // Nos quedamos solo con el array de productos
+          setFetchDatos(res.data);
+        } else {
+          console.error("Error al traer productos:", res);
+        }
+      });
+    }
   };
 
+  // console.log("fetchDatos1", fetchDatos);
   return (
     <>
       <ClickAwayListener onClickAway={handleTooltipClose}>
@@ -52,11 +62,15 @@ export default function MarkdownEditor({ id }: { id: string })
             disableFocusListener
             disableHoverListener
             disableTouchListener
-            title={(
+            title={
               <Suspense fallback={<Loading />}>
-                <MarkdownPreview markdown={fetchDatos} />
+                {fetchDatos ? (
+                  <MarkdownPreview markdown={fetchDatos} />
+                ) : (
+                  <Loading />
+                )}
               </Suspense>
-            )}
+            }
           >
             <button
               onClick={handleTooltipOpen}

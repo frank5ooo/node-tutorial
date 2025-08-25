@@ -13,8 +13,6 @@ export const deleteProduct = actionClient
   .inputSchema(FormSchema)
   .action(async ({ parsedInput }) => {
 
-    console.log("entra");
-
     await prisma.product.delete({
       where: {
         id: parsedInput.id,

@@ -25,8 +25,6 @@ export default function EditInvoiceForm({
     price: products[0].price,
   });
 
-  console.log("formData.price", formData.price);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -45,7 +43,7 @@ export default function EditInvoiceForm({
         console.debug("Producto Actualizado");
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 

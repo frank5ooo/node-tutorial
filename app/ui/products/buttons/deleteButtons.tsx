@@ -2,7 +2,7 @@
 
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { deleteProduct } from "@/app/lib/actions/product/deleteProduct";
-import { fetchProducts } from "@/app/lib/actions";
+import { fetchProductsByInvoiceId } from "@/app/lib/data/fetch-products-by-invoiceId";
 import { deleteInvoice } from "@/app/lib/actions/invoice/deleteInvoice";
 
 type DeleteButtonProps = {
@@ -14,13 +14,8 @@ export function DeleteProduct({ id, invoice_id }: DeleteButtonProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const dataToSend = {
-      id,
-    };
-
     try {
-      console.log("entrssa");
-      const result = await deleteProduct(dataToSend);
+      const result = await deleteProduct({id});
 
       if (result?.serverError) {
         console.error(result?.serverError);
@@ -29,10 +24,10 @@ export function DeleteProduct({ id, invoice_id }: DeleteButtonProps) {
       }
       
       if (!invoice_id) return null;
-      const cantVehicules = await fetchProducts(invoice_id);
-      console.log("cantVehicules1", cantVehicules.length);
+      const cantVehicules = await fetchProductsByInvoiceId({id:invoice_id});
+      // console.log("cantVehicules1", cantVehicules.data?.length);
 
-      if (cantVehicules.length === 1) {
+      if (cantVehicules.data?.length === 0) {
         const resultInvoice = await deleteInvoice({ id: invoice_id });
 
         if (resultInvoice?.serverError) {
@@ -42,7 +37,7 @@ export function DeleteProduct({ id, invoice_id }: DeleteButtonProps) {
         }
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
