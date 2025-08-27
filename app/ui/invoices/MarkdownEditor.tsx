@@ -23,7 +23,7 @@ const LightTooltip = styled(({ className, ...props }: TooltipProps) => (
   },
 }));
 
-type ProductData = { name: string; price: number };
+type ProductData = { name: string; price: BigInt };
 
 export default function MarkdownEditor({ id }: { id: string }) {
   const [open, setOpen] = React.useState(false);

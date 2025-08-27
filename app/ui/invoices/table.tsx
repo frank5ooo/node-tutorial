@@ -5,16 +5,21 @@ import { formatDateToLocal, formatCurrency } from "@/app/lib/utils";
 import { fetchFilteredInvoices } from "@/app/lib/data/filter/fetch-filtered-invoices";
 import MarkdownEditor from "./MarkdownEditor";
 import { DeleteInvoice } from "./buttons/deletebutton";
-import OrderStatus from "./orderStatus";
+import OrderStatus from "./orderStatusInvoices";
 
 export default async function InvoicesTable({
   query,
   currentPage,
+  status,
 }: {
   query: string;
   currentPage: number;
+  status?: string;
 }) {
-  const invoices = await fetchFilteredInvoices({ query, currentPage });
+
+  console.log("status",status);
+
+  const invoices = await fetchFilteredInvoices({ query, currentPage, status });
 
   return (
     <div className="mt-6 flow-root">
@@ -37,7 +42,6 @@ export default async function InvoicesTable({
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
                   <div className="relative">
-
                     <OrderStatus></OrderStatus>
                   </div>
                 </th>

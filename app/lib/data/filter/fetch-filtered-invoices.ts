@@ -7,6 +7,7 @@ const ITEMS_PER_PAGE = 6;
 const FormSchema = z.object({
   currentPage: z.number(),
   query: z.string(),
+  status: z.string().optional(),
 });
 
 export const fetchFilteredInvoices = actionClient
@@ -32,38 +33,61 @@ export const fetchFilteredInvoices = actionClient
           },
         },
         where: {
-          OR: [
-            {
-              customer: {
-                name: { contains: parsedInput.query, mode: "insensitive" },
-              },
-            },
-            {
-              customer: {
-                email: { contains: parsedInput.query, mode: "insensitive" },
-              },
-            },
-            { status: { contains: parsedInput.query, mode: "insensitive" } },
-            ...(isNumber
-              ? [
+          ...(parsedInput.status && parsedInput.status !== ""
+            ? { status: { equals: parsedInput.status, mode: "insensitive" } }
+            : {}),
+
+          ...(parsedInput.query && parsedInput.query !== ""
+            ? {
+                OR: [
                   {
-                    products: {
-                      some: {
-                        price: {
-                          equals: maybePrice,
-                        },
+                    customer: {
+                      name: {
+                        contains: parsedInput.query,
+                        mode: "insensitive",
                       },
                     },
                   },
-                ]
-              : []),
-          ],
+                  {
+                    customer: {
+                      email: {
+                        contains: parsedInput.query,
+                        mode: "insensitive",
+                      },
+                    },
+                  },
+                  {
+                    status: {
+                      contains: parsedInput.query,
+                      mode: "insensitive",
+                    },
+                  },
+                  ...(isNumber
+                    ? [
+                        {
+                          products: {
+                            some: {
+                              price: {
+                                equals: maybePrice,
+                              },
+                            },
+                          },
+                        },
+                      ]
+                    : []),
+                ],
+              }
+            : {}),
         },
+
         orderBy: { date: "desc" },
       });
 
       return invoices.map(({ products, ...invoice }) => {
-        const price = products.reduce((sum, prod) => sum + Number(prod.price), 0);
+        const price = products.reduce(
+          (sum, prod) => sum + Number(prod.price),
+          0
+        );
         return {
           ...invoice,
           price,
@@ -74,5 +98,3 @@ export const fetchFilteredInvoices = actionClient
       throw new Error("Failed to fetch invoices.");
     }
   });
-
-  

@@ -3,7 +3,6 @@ import { actionClient } from "@/app/lib/safe-action";
 import { z } from "zod/v4";
 import { payloadSchema } from "../../definitions";
 
-
 const FormSchema = payloadSchema(
   z.object({
     query: z.string(),
@@ -17,7 +16,7 @@ export const fetchInvoicesPages = actionClient
   .action(async ({ parsedInput }) => {
     const { data, pagination } = parsedInput;
 
-    console.log("data", data);
+    // console.log("data", data);
 
     try {
       const total = await prisma.invoice.count({
@@ -28,11 +27,11 @@ export const fetchInvoicesPages = actionClient
         },
       });
 
-      console.log("total", total);
+        // console.log("total", total);
 
       const perPage = pagination.perPage;
       const totalPages = Math.ceil(total / perPage);
-      console.log("totalPages fetch", totalPages);
+      // console.log("totalPages fetch", totalPages);
       return totalPages;
     } catch (error) {
       console.error("Database Error:", error);

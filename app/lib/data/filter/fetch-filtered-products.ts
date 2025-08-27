@@ -7,6 +7,7 @@ const ITEMS_PER_PAGE = 6;
 const FormSchema = z.object({
   currentPage: z.number(),
   query: z.string(),
+  status: z.string().optional(),
 });
 
 export const fetchFilteredProducts = actionClient
@@ -17,26 +18,39 @@ export const fetchFilteredProducts = actionClient
     const isNumber = !isNaN(maybePrice);
 
     try {
+
+      console.log(parsedInput.status);
+
       const products = await prisma.product.findMany({
         take: ITEMS_PER_PAGE,
         skip: offset,
         where: {
-          OR: [
-            { name: { contains: parsedInput.query, mode: "insensitive" } },
-            ...(isNumber
-              ? [
+          ...(parsedInput.status && parsedInput.status !== ""
+            ? { status: { equals: parsedInput.status, mode: "insensitive" } }
+            : {}),
+
+          ...(parsedInput.query && parsedInput.query !== ""
+            ? {
+                OR: [
                   {
-                    price: {
-                      equals: maybePrice,
-                    },
+                    name: { contains: parsedInput.query, mode: "insensitive" },
                   },
-                ]
-              : []),
-          ],
+                  ...(isNumber
+                    ? [
+                        {
+                          price: {
+                            equals: maybePrice,
+                          },
+                        },
+                      ]
+                    : []),
+                ],
+              }
+            : {}),
         },
-        orderBy:{
-          invoice_id:"asc",
-        }
+        orderBy: {
+          invoice_id: "asc",
+        },
       });
 
       // console.debug(query);

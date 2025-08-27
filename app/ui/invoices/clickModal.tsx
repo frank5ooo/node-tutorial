@@ -7,13 +7,13 @@ import { Remarkable } from 'remarkable';
 const md = new Remarkable();
 
 type Props = {
-  markdown?: {name:string; price: number}[];
+  markdown?: {name:string; price: BigInt}[];
 };
 
 export default function MarkdownPreview({ markdown }: Props) 
 {
   const product = useMemo(() => {
-    return markdown?.map(p => `- ${p.name}: ${formatCurrency(p.price)}`)
+    return markdown?.map(p => `- ${p.name}: ${formatCurrency(Number(p.price))}`)
       .join('\n').toString();
   }, [markdown]);
 

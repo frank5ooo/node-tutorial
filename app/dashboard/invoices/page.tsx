@@ -7,7 +7,7 @@ import { Suspense } from "react";
 import { InvoicesTableSkeleton } from "@/app/ui/skeletons";
 import { fetchInvoicesPages } from "@/app/lib/data/pagination/fetch-invoice-pages";
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
+
 export const metadata: Metadata = {
   title: "Invoices",
 };
@@ -16,18 +16,21 @@ export default async function Page(props: {
   searchParams?: Promise<{
     query?: string;
     page?: string;
+    status?: string
   }>;
 }) {
   const searchParams = await props.searchParams;
-
-  console.log("query", props.searchParams);
   const query = searchParams?.query || "";
-
   const currentPage = Number(searchParams?.page) || 1;
-  const totalPages = await fetchInvoicesPages({ data:{query}, pagination:{page:currentPage} });
+  const totalPages = await fetchInvoicesPages({
+    data: { query },
+    pagination: { page: currentPage },
+  });
 
-  console.log("totalPages", totalPages.data);
-  if(!totalPages.data) return null;
+  // console.log("searchParams",searchParams?.status);
+
+
+  if (!totalPages.data) return null;
 
   return (
     <div className="w-full">
@@ -39,10 +42,10 @@ export default async function Page(props: {
         <CreateInvoice />
       </div>
       <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}>
-        <Table query={query} currentPage={currentPage} />
+        <Table query={query} currentPage={currentPage} status={searchParams?.status}/>
       </Suspense>
       <div className="mt-5 flex w-full justify-center">
-        <Pagination totalPages={totalPages.data} currentPage={currentPage}/>
+        <Pagination totalPages={totalPages.data} currentPage={currentPage} />
       </div>
     </div>
   );
