@@ -1,27 +1,32 @@
 import { prisma } from "@/app/lib/prisma";
 import { actionClient } from "@/app/lib/safe-action";
-import { z } from "zod";
+import { z } from "zod/v4";
+import { payloadSchema } from "../../definitions";
 
-const ITEMS_PER_PAGE = 6;
-
-const FormSchema = z.object({
-  query: z.string(),
-});
+const FormSchema = payloadSchema(
+  z.object({
+    query: z.string(),
+  })
+);
 
 export const fetchProductPages = actionClient
   .inputSchema(FormSchema)
   .action(async ({ parsedInput }) => {
+    const { data, pagination } = parsedInput;
+
     try {
-      const data = await prisma.product.count({
+      const total = await prisma.product.count({
         where: {
-          name: { contains: parsedInput.query, mode: "insensitive" },
+          name: { contains: data.query, mode: "insensitive" },
         },
-        orderBy:{
-          price:"asc",
-        }
+        orderBy: {
+          price: "desc",
+        },
       });
 
-      const totalPages = Math.ceil(Number(data) / ITEMS_PER_PAGE);
+      const perPage = pagination.perPage;
+      const totalPages = Math.ceil(total / perPage);
+      // console.log("totalPages fetch", totalPages);
       return totalPages;
     } catch (error) {
       console.error("Database Error:", error);

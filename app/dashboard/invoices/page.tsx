@@ -19,14 +19,16 @@ export default async function Page(props: {
   }>;
 }) {
   const searchParams = await props.searchParams;
-  const query = searchParams?.query || "";
-  const currentPage = Number(searchParams?.page) || 1;
-  const totalPages = await fetchInvoicesPages({ query });
 
-  if (!totalPages.data) {
-    notFound();
-  }
-  
+  console.log("query", props.searchParams);
+  const query = searchParams?.query || "";
+
+  const currentPage = Number(searchParams?.page) || 1;
+  const totalPages = await fetchInvoicesPages({ data:{query}, pagination:{page:currentPage} });
+
+  console.log("totalPages", totalPages.data);
+  if(!totalPages.data) return null;
+
   return (
     <div className="w-full">
       <div className="flex w-full items-center justify-between">
@@ -40,7 +42,7 @@ export default async function Page(props: {
         <Table query={query} currentPage={currentPage} />
       </Suspense>
       <div className="mt-5 flex w-full justify-center">
-        <Pagination totalPages={totalPages.data} />
+        <Pagination totalPages={totalPages.data} currentPage={currentPage}/>
       </div>
     </div>
   );

@@ -17,21 +17,21 @@ export const PaginationPayload = z.object({
 export type Pagination = z.input<typeof PaginationPayload>;
 
 interface Payload<D> {
-  pagination?: Pagination;
-  data: D;
+  pagination: Pagination;
+  data?: D;
 }
 
-export function payloadSchema<D>(data: ZodType<D>) {
+export function payloadSchema<S extends ZodType>(data: S) {
+  type D= z.output<S>
+  
   return z.object({
     data,
-    pagination: PaginationPayload.optional(),
+    pagination: PaginationPayload,
   }) satisfies ZodType<Payload<D>>;
 }
 
-const FormSchema = payloadSchema(
+export const FormSchema = payloadSchema(
   z.object({
-    idCustomer: z.number(),
+    idCustomer: z.string(),
   })
 );
-
-const data = FormSchema.parse({});

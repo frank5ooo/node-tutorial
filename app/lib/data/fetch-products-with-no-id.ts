@@ -13,9 +13,6 @@ export async function fetchProductsWithNoId() {
         name: true,
         invoice_id: true,
       },
-      orderBy: {
-        name: "asc",
-      },
     });
 
     return product;

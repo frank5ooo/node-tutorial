@@ -1,26 +1,39 @@
 import { prisma } from "@/app/lib/prisma";
 import { actionClient } from "@/app/lib/safe-action";
-import { z } from "zod";
+import { z } from "zod/v4";
+import { payloadSchema } from "../../definitions";
 
 const ITEMS_PER_PAGE = 6;
 
-const FormSchema = z.object({
-  query: z.string(),
-});
+const FormSchema = payloadSchema(
+  z.object({
+    query: z.string(),
+  })
+);
+
+// type A=z.input<typeof FormSchema>
 
 export const fetchInvoicesPages = actionClient
   .inputSchema(FormSchema)
   .action(async ({ parsedInput }) => {
+    const { data, pagination } = parsedInput;
+
+    console.log("data", data);
+
     try {
-      const data = await prisma.invoice.count({
+      const total = await prisma.invoice.count({
         where: {
           customer: {
-            name: { contains: parsedInput.query, mode: "insensitive" },
+            name: { contains: data.query, mode: "insensitive" },
           },
         },
       });
 
-      const totalPages = Math.ceil(Number(data) / ITEMS_PER_PAGE);
+      console.log("total", total);
+
+      const perPage = pagination.perPage;
+      const totalPages = Math.ceil(total / perPage);
+      console.log("totalPages fetch", totalPages);
       return totalPages;
     } catch (error) {
       console.error("Database Error:", error);

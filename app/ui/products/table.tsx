@@ -10,7 +10,10 @@ export default async function ProductsTable({
   query: string;
   currentPage: number;
 }) {
-  const products = await fetchFilteredProducts({query, currentPage});
+  const products = await fetchFilteredProducts({ query, currentPage });
+
+  
+
 
   return (
     <div className="mt-6 flow-root">
