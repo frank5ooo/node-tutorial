@@ -63,7 +63,7 @@ export const fetchFilteredInvoices = actionClient
       });
 
       return invoices.map(({ products, ...invoice }) => {
-        const price = products.reduce((sum, prod) => sum + prod.price, 0);
+        const price = products.reduce((sum, prod) => sum + Number(prod.price), 0);
         return {
           ...invoice,
           price,

@@ -36,7 +36,7 @@ export default async function ProductsTable({
                 <div className="flex w-full items-center justify-between pt-4">
                   <div>
                     <p className="text-xl font-medium">
-                      {formatCurrency(product.price)}
+                      {formatCurrency(Number(product.price))}
                     </p>
                   </div>
                   <div className="flex justify-end gap-2">
@@ -79,7 +79,7 @@ export default async function ProductsTable({
                     </div>
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    {formatCurrency(product.price)}
+                    {formatCurrency(Number(product.price))}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
                     <ProductStatus invoice_id={product.invoice_id} />

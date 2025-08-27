@@ -3,7 +3,6 @@ import { actionClient } from "@/app/lib/safe-action";
 import { z } from "zod/v4";
 import { payloadSchema } from "../../definitions";
 
-const ITEMS_PER_PAGE = 6;
 
 const FormSchema = payloadSchema(
   z.object({

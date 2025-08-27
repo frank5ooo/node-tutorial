@@ -46,7 +46,7 @@ export async function fetchLatestInvoices() {
 
     const latestInvoices = data.map((invoice) => {
       const total = invoice.products.reduce(
-        (sum, product) => sum + product.price,
+        (sum, product) => sum + Number(product.price),
         0
       );
       return {
@@ -82,7 +82,7 @@ export async function fetchCardData() {
     let pending = 0;
 
     for (const invoice of invoices) {
-      const total = invoice.products.reduce((acc, p) => acc + p.price, 0);
+      const total = invoice.products.reduce((acc, p) => acc + Number(p.price), 0);
       if (invoice.status === "paid") {
         paid += total;
       } else if (invoice.status === "pending") {

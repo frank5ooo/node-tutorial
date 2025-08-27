@@ -1,10 +1,11 @@
-import Image from 'next/image';
-import { UpdateInvoice } from '@/app/ui/invoices/buttons/buttons';
-import InvoiceStatus from '@/app/ui/invoices/status';
-import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
-import { fetchFilteredInvoices } from '@/app/lib/data/filter/fetch-filtered-invoices';
-import MarkdownEditor from './MarkdownEditor';
-import { DeleteInvoice } from './buttons/deletebutton';
+import Image from "next/image";
+import { UpdateInvoice } from "@/app/ui/invoices/buttons/buttons";
+import InvoiceStatus from "@/app/ui/invoices/status";
+import { formatDateToLocal, formatCurrency } from "@/app/lib/utils";
+import { fetchFilteredInvoices } from "@/app/lib/data/filter/fetch-filtered-invoices";
+import MarkdownEditor from "./MarkdownEditor";
+import { DeleteInvoice } from "./buttons/deletebutton";
+import OrderStatus from "./orderStatus";
 
 export default async function InvoicesTable({
   query,
@@ -13,49 +14,12 @@ export default async function InvoicesTable({
   query: string;
   currentPage: number;
 }) {
-  const invoices = await fetchFilteredInvoices({query, currentPage});
+  const invoices = await fetchFilteredInvoices({ query, currentPage });
 
   return (
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
         <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
-          <div className="md:hidden">
-            {invoices.data?.map((invoice) => (
-              <div
-                key={invoice.id}
-                className="mb-2 w-full rounded-md bg-white p-4"
-              >
-                <div className="flex items-center justify-between border-b pb-4">
-                  <div>
-                    <div className="mb-2 flex items-center">
-                      <Image
-                        src={invoice.customer.image_url}
-                        className="mr-2 rounded-full"
-                        width={28}
-                        height={28}
-                        alt={`${invoice.customer.name}'s profile picture`}
-                      />
-                      <p>{invoice.customer.name}</p>
-                    </div>
-                    <p className="text-sm text-gray-500">{invoice.customer.email}</p>
-                  </div>
-                  <InvoiceStatus status={invoice.status} />
-                </div>
-                <div className="flex w-full items-center justify-between pt-4">
-                  <div>
-                    <p>{formatCurrency(invoice.price)}</p>
-                  </div>
-                  <div>
-                    <p>{formatDateToLocal(invoice.date.toISOString())}</p>
-                  </div>
-                  <div className="flex justify-end gap-2">
-                    <UpdateInvoice id={invoice.id} />
-                    <DeleteInvoice id={invoice.id}/>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
           <table className="hidden min-w-full text-gray-900 md:table">
             <thead className="rounded-lg text-left text-sm font-normal">
               <tr>
@@ -72,7 +36,10 @@ export default async function InvoicesTable({
                   Date
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Status
+                  <div className="relative">
+
+                    <OrderStatus></OrderStatus>
+                  </div>
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
                   Products
@@ -113,12 +80,12 @@ export default async function InvoicesTable({
                     <InvoiceStatus status={invoice.status} />
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                      <MarkdownEditor id={invoice.id}/>
+                    <MarkdownEditor id={invoice.id} />
                   </td>
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex justify-end gap-3">
                       <UpdateInvoice id={invoice.id} />
-                      <DeleteInvoice id={invoice.id}/>
+                      <DeleteInvoice id={invoice.id} />
                     </div>
                   </td>
                 </tr>
