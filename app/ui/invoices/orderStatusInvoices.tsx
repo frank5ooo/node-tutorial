@@ -6,12 +6,14 @@ import { useState, useEffect } from "react";
 export default function OrderStatus() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const router = useRouter();
-  
-  const [selectedStatus, setSelectedStatus] = useState(searchParams.get('status') || '');
+  const router = useRouter(); // <- usamos router directamente
+
+  const [selectedStatus, setSelectedStatus] = useState(
+    searchParams.get("status") || ""
+  );
 
   useEffect(() => {
-    setSelectedStatus(searchParams.get('status') || '');
+    setSelectedStatus(searchParams.get("status") || "");
   }, [searchParams]);
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -19,15 +21,19 @@ export default function OrderStatus() {
     setSelectedStatus(value);
 
     const params = new URLSearchParams(searchParams.toString());
-    
+
     if (value) {
-      params.set('status', value);
+      params.set("status", value);
     } else {
-      params.delete('status');
+      params.delete("status");
     }
 
-    // Navegar a la nueva URL
-    router.push(`${pathname}?${params.toString()}`);
+    // Siempre resetear la página a 1 al cambiar filtro
+    params.set("page", "1");
+
+    // Reemplaza la URL sin recargar la página
+    router.replace(`${pathname}?${params.toString()}`);
+    
   };
 
   return (

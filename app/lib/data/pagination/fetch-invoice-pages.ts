@@ -6,35 +6,65 @@ import { payloadSchema } from "../../definitions";
 const FormSchema = payloadSchema(
   z.object({
     query: z.string(),
+    status: z.string(),
   })
 );
-
-// type A=z.input<typeof FormSchema>
 
 export const fetchInvoicesPages = actionClient
   .inputSchema(FormSchema)
   .action(async ({ parsedInput }) => {
     const { data, pagination } = parsedInput;
 
-    // console.log("data", data);
+    const maybePrice = Number(data.query) * 100;
+    const isNumber = !isNaN(maybePrice);
+
+    // console.log("data", data.status);
+
+    const filters: any = {
+      ...(data && data.status
+        ? { status: { equals: data.status, mode: "insensitive" } }
+        : {}),
+      ...(data && data.status
+        ? {
+            AND: [
+              {
+                OR: [
+                  {
+                    customer: {
+                      name: { contains: data.query, mode: "insensitive" },
+                    },
+                  },
+                  {
+                    customer: {
+                      email: { contains: data.query, mode: "insensitive" },
+                    },
+                  },
+                  { status: { contains: data.query, mode: "insensitive" } },
+                  ...(isNumber
+                    ? [
+                        {
+                          products: { some: { price: { equals: maybePrice } } },
+                        },
+                      ]
+                    : []),
+                ],
+              },
+            ],
+          }
+        : {}),
+    };
 
     try {
-      const total = await prisma.invoice.count({
-        where: {
-          customer: {
-            name: { contains: data.query, mode: "insensitive" },
-          },
-        },
+      const totalItems = await prisma.invoice.count({
+        where: filters,
       });
 
-        // console.log("total", total);
+      const totalPages = Math.ceil(totalItems / pagination.perPage);
+      // console.log("totalPages 1111", totalItems);
 
-      const perPage = pagination.perPage;
-      const totalPages = Math.ceil(total / perPage);
-      // console.log("totalPages fetch", totalPages);
       return totalPages;
     } catch (error) {
       console.error("Database Error:", error);
-      throw new Error("Failed to fetch total number of invoices.");
+      throw new Error("Failed to fetch invoices.");
     }
   });

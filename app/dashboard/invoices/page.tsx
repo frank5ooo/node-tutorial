@@ -16,20 +16,20 @@ export default async function Page(props: {
   searchParams?: Promise<{
     query?: string;
     page?: string;
-    status?: string
+    status?: string;
   }>;
 }) {
   const searchParams = await props.searchParams;
   const query = searchParams?.query || "";
   const currentPage = Number(searchParams?.page) || 1;
+  const status = searchParams?.status || "";
+  
   const totalPages = await fetchInvoicesPages({
-    data: { query },
+    data: { query, status },
     pagination: { page: currentPage },
   });
 
-  // console.log("searchParams",searchParams?.status);
-
-
+  console.log("totalPages.data", status);
   if (!totalPages.data) return null;
 
   return (
@@ -42,7 +42,11 @@ export default async function Page(props: {
         <CreateInvoice />
       </div>
       <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}>
-        <Table query={query} currentPage={currentPage} status={searchParams?.status}/>
+        <Table
+          query={query}
+          currentPage={currentPage}
+          status={searchParams?.status}
+        />
       </Suspense>
       <div className="mt-5 flex w-full justify-center">
         <Pagination totalPages={totalPages.data} currentPage={currentPage} />

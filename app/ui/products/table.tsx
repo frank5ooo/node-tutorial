@@ -1,9 +1,10 @@
 import { UpdateProduct } from "@/app/ui/products/buttons/buttons";
-import ProductStatus from "@/app/ui/products/status";
 import { formatCurrency } from "@/app/lib/utils";
 import { fetchFilteredProducts } from "@/app/lib/data/filter/fetch-filtered-products";
 import { DeleteProduct } from "./buttons/deleteButtons";
+import ProductStatus from "@/app/ui/products/status";
 import OrderStatus from "./orderStatusProducts";
+
 export default async function ProductsTable({
   query,
   currentPage,

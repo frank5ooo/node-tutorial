@@ -7,29 +7,29 @@ export default function OrderStatus() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
-  
-  const [selectedStatus, setSelectedStatus] = useState(searchParams.get('status') || '');
+
+  const [selectedStatus, setSelectedStatus] = useState(
+    searchParams.get("status") || ""
+  );
 
   useEffect(() => {
-    setSelectedStatus(searchParams.get('status') || '');
+    setSelectedStatus(searchParams.get("status") || "");
   }, [searchParams]);
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setSelectedStatus(value);
 
-
-    console.log("value",value);
+    console.log("value", value);
 
     const params = new URLSearchParams(searchParams.toString());
-    
+
     if (value) {
-      params.set('status', value);
+      params.set("status", value);
     } else {
-      params.delete('status');
+      params.delete("status");
     }
 
-    // Navegar a la nueva URL
     router.push(`${pathname}?${params.toString()}`);
   };
 
@@ -43,8 +43,8 @@ export default function OrderStatus() {
       onChange={handleStatusChange}
     >
       <option value="">All</option>
-      <option value="paid">Sell</option>
-      <option value="pending">OnStock</option>
+      <option value="Sell">Sell</option>
+      <option value="OnStock">OnStock</option>
     </select>
   );
 }

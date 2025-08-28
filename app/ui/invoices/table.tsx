@@ -17,10 +17,8 @@ export default async function InvoicesTable({
   status?: string;
 }) {
 
-  console.log("status",status);
-
   const invoices = await fetchFilteredInvoices({ query, currentPage, status });
-
+  
   return (
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
@@ -42,7 +40,7 @@ export default async function InvoicesTable({
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
                   <div className="relative">
-                    <OrderStatus></OrderStatus>
+                    <OrderStatus ></OrderStatus>
                   </div>
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">

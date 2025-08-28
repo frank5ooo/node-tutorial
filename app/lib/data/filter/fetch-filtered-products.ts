@@ -1,5 +1,6 @@
 import { prisma } from "@/app/lib/prisma";
 import { actionClient } from "@/app/lib/safe-action";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 
 const ITEMS_PER_PAGE = 6;
@@ -18,15 +19,16 @@ export const fetchFilteredProducts = actionClient
     const isNumber = !isNaN(maybePrice);
 
     try {
-
-      console.log(parsedInput.status);
-
       const products = await prisma.product.findMany({
         take: ITEMS_PER_PAGE,
         skip: offset,
         where: {
-          ...(parsedInput.status && parsedInput.status !== ""
-            ? { status: { equals: parsedInput.status, mode: "insensitive" } }
+          ...(parsedInput.status && parsedInput.status == "Sell"
+            ? { invoice_id: { not: null } }
+            : {}),
+
+          ...(parsedInput.status && parsedInput.status == "OnStock"
+            ? { invoice_id: { equals: null } }
             : {}),
 
           ...(parsedInput.query && parsedInput.query !== ""
@@ -53,7 +55,9 @@ export const fetchFilteredProducts = actionClient
         },
       });
 
-      // console.debug(query);
+
+      
+
       return products;
     } catch (error) {
       console.error("Database Error:", error);
